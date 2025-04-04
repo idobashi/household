@@ -6,7 +6,7 @@ let paymentList = [];
 // 非同期関数を修正
 async function fetchData() {
     console.log('Before fetch');
-    const response = await fetch('https://script.google.com/macros/s/AKfycbz12ZW4_j9Vv6opKidmAzY57b11cIh9apajtjCnMqOjBrdg6wSA658A1ZHzP1dpCWtr/exec');
+    const response = await fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec');
     const data = await response.json();
     console.log('取得したデータ:', data);
     return data; // データを返す
@@ -345,10 +345,14 @@ function sendData() {
     console.log("送信するデータ:", newData); // 🔍 確認用
 
     // データ送信
-    fetch('https://script.google.com/macros/s/AKfycbz12ZW4_j9Vv6opKidmAzY57b11cIh9apajtjCnMqOjBrdg6wSA658A1ZHzP1dpCWtr/exec', {
-        'method': 'POST',
-        'body': JSON.stringify(newData),
-        "Content-Type" : "application/json"
+    /*fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec', {
+        method: "POST",
+        headers:{
+            "Accept": "application/json",
+            "Content-Type" : "application/x-www-form-urlencoded"
+        },
+        'body': JSON.stringify(jsonData),
+        
         })
         .then(response => {
             console.log("1");
@@ -361,9 +365,8 @@ function sendData() {
         .catch(err => {
             console.log("3");
         // エラー処理
-        });
-    //updateJSONData(newData);
-    jsonData.push(newData);
+        });*/
+    updateJSONData(newData);
     updateTable();
     alert("送信しました！");
     closePopup();
@@ -411,17 +414,11 @@ function onLoad() {
     document.getElementById("date").value = today;
 }
 
-
-
 // 月を切り替える
 function changeMonth(offset) {
     currentDate.setMonth(currentDate.getMonth() + offset);  // 月を変更
     updateTable();  // 表示を更新
 }
-
-
-
-
 
 function toggleEditMode() {
     isEditing = !isEditing;
@@ -494,38 +491,28 @@ function saveTableData() {
             }
         }
     });
-
+    let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
+    let total = 0;
+    jsonData.forEach(entry => {
+        if (entry.date.startsWith(currentMonth)) { // 今月のデータのみ集計
+          total += parseFloat(entry.price);
+        }
+      });
+    document.getElementById("totalAmount").innerText = "合計金額: " + total + "円";
 // まとめて JSON に反映
 updateJSONData(JSON.stringify(jsonData));
 }
 
-/*function updateJSONData(newData) {
-    var fileName = 'exported_data.json';
-    var files = DriveApp.getFilesByName(fileName);
-    var jsonData;
+function updateJSONData(newData) {
+    console.log("updateJsonData");
     let newJsonData;
-    var file;
-  
-    if (files.hasNext()) {
-      file = files.next();
-      var jsonContent = file.getBlob().getDataAsString();
-  
-      try {
-        jsonData = JSON.parse(jsonContent);
-      } catch (e) {
-        jsonData = [];
-      }
-    } else {
-      jsonData = [];
-      file = DriveApp.createFile(fileName, JSON.stringify(jsonData, null, 2), MimeType.PLAIN_TEXT);
-    }
-  
+    let updatedContent = [];
     newJsonData = (typeof newData === "string") ? JSON.parse(newData) : newData;
-  
-  
+    console.log("updateJsonData : " + newJsonData);
+
     let updated = false;
     for (let i = 0; i < jsonData.length; i++) {
-        for (let j = 0; i < newJsonData.length; j++){
+        for (let j = 0; j < newJsonData.length; j++){
           if (jsonData[i].id === newJsonData[j].id) {
             Object.assign(jsonData[i], newJsonData[j]);
             updated = true;
@@ -533,12 +520,31 @@ updateJSONData(JSON.stringify(jsonData));
         }
       }
     }
-  
-    if (updated) {
-      var updatedContent = JSON.stringify(jsonData, null, 2);
-      file.setContent(updatedContent);
-    } else {
+    console.log("updateJsonData : " + updated);
+    if (!updated) {
        jsonData.push(newData);
-       file.setContent(JSON.stringify(jsonData, null, 2));
     }
-  }*/
+    //updatedContent = JSON.stringify(jsonData, null, 2);
+    
+    fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec', {
+    method: "POST",
+    headers:{
+        "Accept": "application/json",
+        "Content-Type" : "application/x-www-form-urlencoded"
+    },
+    'body': JSON.stringify(jsonData),
+    
+    })
+    .then(response => {
+        console.log("1");
+    return response.json();
+    })
+    .then(json => {
+        console.log("2");
+    // レスポンス json の処理
+    })
+    .catch(err => {
+        console.log("3" + err.message);
+    // エラー処理
+    });
+  }
