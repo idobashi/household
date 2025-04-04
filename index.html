@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>My PWA App</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <h1>Hello, PWA!</h1>
+  <p>これがホーム画面に追加できるアプリです。</p>
+
+  <script>
+    // Service Worker登録
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('SW登録成功'))
+        .catch(err => console.error('SW登録失敗:', err));
+    }
+  </script>
+</body>
+</html>
