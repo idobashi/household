@@ -29,6 +29,16 @@ async function loadJSON() {
     }
 }
 
+function includePayment(payment){
+    let cardList = ["paypay","楽天"]
+    let bankList = ["りそな銀行"]
+    if(cardList.includes(payment)){
+        return "クレジットカード"
+    }else if(bankList.includes(payment)){
+        return "銀行"
+    }
+}
+
 // JSONデータをテーブルに表示（フィルタリングあり）
 function updateTable() {
     let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -471,8 +481,12 @@ function saveTableData() {
             if (paymentParts === "現金") {
                 updatedEntry.payment.payment1 = paymentParts;
                 updatedEntry.payment.payment2 = "";
-            } else {
-                updatedEntry.payment.payment1 = paymentList[index];
+            } else{
+                if(includePayment(paymentParts) === "クレジットカード"){
+                    updatedEntry.payment.payment1 = "クレジットカード"
+                    updatedEntry.payment.payment2 = paymentParts;
+                }else if(includePayment(paymentParts) === "銀行")
+                updatedEntry.payment.payment1 = "銀行";
                 updatedEntry.payment.payment2 = paymentParts;
             }
 
