@@ -1,22 +1,258 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>My PWA App</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>Hello, PWA!</h1>
-  <p>これがホーム画面に追加できるアプリです。</p>
 
-  <script>
-    // Service Worker登録
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('SW登録成功'))
-        .catch(err => console.error('SW登録失敗:', err));
-    }
-  </script>
+<body onload="onLoad()">
+  <!-- IDを保持する hidden フィールド -->
+  <input type="hidden" id="dataId">
+  <input type="hidden" id="paymentList">
+  <!-- 月切り替えボタン -->
+  <button onclick="changeMonth(-1)">前月</button>
+  <span id="currentMonth"></span>
+  <button onclick="changeMonth(1)">翌月</button>
+
+  <div id="totalAmount">合計金額: 0</div>
+  
+  <button id ="dataEntryButton" onclick="showPopup()">データ入力</button>
+  <button id="editButton" onclick="toggleEditMode()">編集</button>
+  <div id="jsonTable"></div> <!-- ここにJSONデータが表示されます -->
+
+  <div id="overlay" class="overlay" onclick="closePopup()"></div>
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3>データ入力</h3>
+      <div class="form-group">
+        <label for="date">日付</label>
+        <div class="input-group">
+          <input type="date" id="date">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="category-label">項目</label>
+        <div class="select-wrapper">
+          <select id="category" onchange="showDetail()">
+            <option value="">選択してください</option>
+            <option value="食費">食費</option>
+            <option value="美容費">美容費</option>
+            <option value="医療・保険費">医療・保険費</option>
+            <option value="日用品費">日用品費</option>
+            <option value="交際費">交際費</option>
+            <option value="娯楽費">娯楽費</option>
+            <option value="交通費">交通費</option>
+            <option value="水道・光熱費">水道・光熱費</option>
+            <option value="住まい全体">住まい全体</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 各カテゴリの詳細 -->
+      <!-- 食費 -->
+      <div class = "form-group" id="foodCategory1" style="display:none;">
+        <label for="food-label1">食費詳細1</label>
+        <div class="select-wrapper">
+          <select id="foodType1" onchange="showFoodCategory2()">
+            <option value="食料品">食料品</option>
+            <option value="外食費">外食費</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class = "form-group" id="foodCategory2" style="display:none;">
+        <label for="food-label2">食費詳細2</label>
+        <div class="select-wrapper">
+          <select id="foodType2">        
+            <option value="朝ごはん">朝ごはん</option>
+            <option value="昼ごはん">昼ごはん</option>
+            <option value="夜ごはん">夜ごはん</option>
+            <option value="カフェ">カフェ</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class = "form-group" id="beautyCategory" style="display:none;">
+        <label for="beauty-label">美容費詳細</label>
+        <div class="select-wrapper">
+          <select id="beautyType">
+            <option value="美容院、サロン">美容院・サロン</option>
+            <option value="化粧品">化粧品</option>
+            <option value="洋服">洋服</option>
+            <option value="下着">下着</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="medicalCategory" style="display:none;">
+        <label for="medical-label">医療・保険費</label>
+        <div class="select-wrapper">
+          <select id="medicalType">
+            <option value="病院代">病院代</option>
+            <option value="薬代">薬代</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="dailyNecessitiesCategory" style="display:none;">
+        <h3> </h3>
+        <label for="dailyNecessities-label">日用品費</label>
+        <div class="select-wrapper">
+          <select id="dailyNecessitiesType">
+            <option value="消耗品">消耗品</option>
+            <option value="清掃用品">清掃用品</option>
+            <option value="日用雑貨">日用雑貨</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="socialCategory" style="display:none;">
+        <label for="social-label">交際費</label>
+        <div class="select-wrapper">
+          <select id="socialType">
+            <option value="プレゼント">プレゼント</option>
+            <option value="ご祝儀・香典">ご祝儀・香典</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="entertainmentCategory" style="display:none;">
+        <label for="entertainment-label">娯楽費</label>
+        <div class="select-wrapper">
+          <select id="entertainmentType">
+            <option value="旅行">旅行</option>
+            <option value="イベント">イベント</option>
+            <option value="映画">映画</option>
+            <option value="漫画・本">漫画・本</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group" id="transportationCategory" style="display:none;">
+        <label for="transportation-label">交通費</label>
+        <div class="select-wrapper">
+          <select id="transportationType">
+            <option value="電車">電車</option>
+            <option value="バス">バス</option>
+            <option value="飛行機">飛行機</option>
+            <option value="タクシー">タクシー</option>
+            <option value="その他">その他</option>
+         </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="utilityCategory" style="display:none;">
+        <label for="utility-label">水道・光熱費</label>
+        <div class="select-wrapper">
+          <select id="utilityType">
+            <option value="水道">水道</option>
+            <option value="電気">電気</option>
+            <option value="ガス">ガス</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="residenceCategory" style="display:none;">
+        <label for="residence-label">住まい全体</label>
+        <div class="select-wrapper">
+          <select id="residenceType">
+            <option value="家賃">家賃</option>
+            <option value="家電">家電</option>
+            <option value="家具">家具</option>
+            <option value="雑貨">雑貨</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="othersCategory" style="display:none;">
+        <label for="others-label">その他</label>
+        <div class="input-group">
+         <input type="text"  id="othersType">
+        </div>
+      </div>
+
+      <!-- 購入店舗 -->
+      <div class="form-group" id="shopCategory" style="display: block;">
+        <label for="shop-label">店舗</label>
+        <div class="input-group">
+          <input type="text" id="shop">
+        </div>
+      </div>
+
+      <!-- 支払い方法 -->
+      <div class="form-group" id="paymentCategory" style="display: block;">
+        <label for="payment-label">支払い方法</label>
+        <div class="select-wrapper">
+          <select id="paymentType" onchange="showPaymentDetail()">
+            <option value="">選択してください</option>
+            <option value="現金">現金</option>
+            <option value="クレジットカード">クレジットカード</option>
+            <option value="銀行">銀行</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 銀行詳細 -->
+      <div class="form-group" id="bankCategory" style="display: none;">
+        <label for="bank-label">銀行</label>
+        <div class="select-wrapper">
+          <select id="bankType">
+            <option value="">選択してください</option>
+            <option value="りそな銀行">りそな銀行</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- クレジットカード詳細 -->
+      <div class="form-group" id="cardCategory" style="display: none;">
+        <label for="card-label">クレジットカード</label>
+        <div class="select-wrapper">
+          <select id="cardType">
+            <option value="">選択してください</option>
+            <option value="楽天">楽天カード</option>
+            <option value="paypay">paypayカード</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 金額 -->
+      <div class="form-group" id="priceCategory" style="display: block;">
+        <label for="price-label">金額</label>
+        <div class="input-group">
+          <input type="number" id="price">
+        </div>
+      </div>
+      
+      <!-- 内税 -->
+      <div class="form-group" id="taxCategory" style="display: block;">
+        <label for="tax-label">内税</label>
+        <div class="input-group">
+          <input type="number" id="tax">
+        </div>
+      </div>
+
+      <!-- 備考 -->
+      <div class="form-group" id="remarksCategory" style="display: block;">
+        <label for="price-label">備考</label>
+        <div class="input-group">
+          <input type="text" id="remarks">
+        </div>
+      </div>
+      <button onclick="sendData()">送信</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
