@@ -292,33 +292,23 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
-      overflow-x: auto; /* ← 横スクロールを許可 */
     }
     
-    
     .accordion-content label {
-      display: inline-flex;
+      display: flex;
+      flex-direction: row-reverse; /* ← チェックボックスを左に */
       align-items: center;
-      gap: 0.4em;
+      gap: 0.5em;
       background-color: #f0f0f0;
       padding: 0.4em 0.8em;
       border-radius: 8px;
       font-size: 0.9em;
       cursor: pointer;
-      white-space: nowrap;
       box-sizing: border-box;
-    
-      /* はみ出し防止 */
+      word-break: break-word; /* ← 長いテキストを折り返す */
       max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0; /* ← これが地味に効く */
+      flex: 1 1 auto;  /* ← 折り返しOKにする */
+      min-width: 0;   /* ← はみ出し防止 */
     }
-
-    @media (max-width: 480px) {
-      .accordion-content label {
-        font-size: 0.85em;
-        padding: 0.3em 0.6em;
-      }
-    }
+    
     
