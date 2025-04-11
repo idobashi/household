@@ -292,21 +292,23 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       display: none;
       padding: 0.5em 1em;
       background-color: #fff;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
     
       /* 横並び用 */
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
     }
+
     
     .accordion-content label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3em;
-      background-color: #f0f0f0;
-      padding: 0.3em 0.6em;
-      border-radius: 8px;
-      font-size: 0.9em;
-      cursor: pointer;
-      white-space: nowrap;
+      display: flex; /* inline-flex でもOKだけどこっちのがスマホ向き */
+      flex: 1 1 auto; /* ← 幅が詰まりすぎないように */
+      white-space: normal; /* ← 折り返しOKにする！ */
+      max-width: 100%; /* はみ出さない */
     }
+
+   
