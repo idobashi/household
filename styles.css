@@ -292,24 +292,30 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
-      justify-content: flex-start;
     }
     
     .accordion-content label {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 0.4em;
-      padding: 0.4em 0.8em;
       background-color: #f0f0f0;
+      padding: 0.4em 0.8em;
       border-radius: 8px;
       font-size: 0.9em;
+      cursor: pointer;
       white-space: nowrap;
       box-sizing: border-box;
     
-      /* これが追加点 */
-      flex-shrink: 0;
+      /* はみ出し防止 */
       max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-   
+    @media (max-width: 480px) {
+      .accordion-content label {
+        font-size: 0.85em;
+        padding: 0.3em 0.6em;
+      }
+    }
+    
