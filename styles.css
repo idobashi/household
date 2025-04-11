@@ -292,7 +292,9 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
+      overflow-x: auto; /* ← 横スクロールを許可 */
     }
+    
     
     .accordion-content label {
       display: inline-flex;
@@ -310,6 +312,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0; /* ← これが地味に効く */
     }
 
     @media (max-width: 480px) {
