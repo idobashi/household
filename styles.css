@@ -296,19 +296,21 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     
     .accordion-content label {
       display: flex;
-      flex-direction: row-reverse; /* ← チェックボックスを左に */
       align-items: center;
-      gap: 0.5em;
       background-color: #f0f0f0;
       padding: 0.4em 0.8em;
       border-radius: 8px;
       font-size: 0.9em;
       cursor: pointer;
       box-sizing: border-box;
-      word-break: break-word; /* ← 長いテキストを折り返す */
       max-width: 100%;
-      flex: 1 1 auto;  /* ← 折り返しOKにする */
-      min-width: 0;   /* ← はみ出し防止 */
+    
+      /* 折り返しと中に収める */
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: break-word;
+      white-space: normal;
+      gap: 0.5em;
     }
     
     
