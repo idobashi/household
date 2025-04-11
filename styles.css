@@ -13,8 +13,9 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       font-size:24px;
       width: 600px;  /* 幅を広げる */
       max-width: 100%;  /* 最大幅を画面の90%に設定 */
+      z-index: 100;
     }
-
+    
     .modal-content {
       max-height: 80vh; /* 画面の80%の高さを最大値に */
       overflow-y: auto; /* 縦スクロールを有効に */
@@ -102,9 +103,10 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
     th:nth-child(1), td:nth-child(1) { width: 8%; } /* 日付 */
     th:nth-child(2), td:nth-child(2) { width: 21%; } /* 項目 */
-    th:nth-child(3), td:nth-child(3) { width: 14%; } /* 金額 */
+    th:nth-child(3), td:nth-child(3) { width: 12%; } /* 金額 */
     th:nth-child(4), td:nth-child(4) { width: 12%; } /* 支払い */
-    th:nth-child(5), td:nth-child(5) { width: 45%; } /* 備考 */
+    th:nth-child(5), td:nth-child(5) { width: 40%; } /* 備考 */
+    th:nth-child(6), td:nth-child(6) { width: 7%; } /* 詳細 */
 
     #totalAmount {
       font-size: 40px; /* ここでサイズ調整 */
@@ -137,4 +139,174 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
     .small-text {
       font-size: 18px;
+    }
+    #filterModal {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 24px;
+      width: 600px;
+      max-width: 100%;
+    }
+    #filterModal .modal-content {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detailModal {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 24px;
+      width: 600px;
+      max-width: 100%;
+    }
+    
+    .modal-content {
+      background: white;
+      margin: 10% auto;
+      padding: 20px;
+      width: 80%;
+    }
+    /*.input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }*/
+
+    .input-group {
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-right: 32px; /* ここでマイナスボタン分の余白を確保 */
+    }
+    .search-group{
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .input-group input[type="text"],
+    .input-group input[type="number"] {
+      flex: 1; /* 入力欄を均等に広げる */
+      padding: 5px;
+      min-width: 0; /* 長すぎる時に折り返し防止用 */
+    }
+
+    #addInput, .removeInput {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1;
+      text-align: center;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s, transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      padding: 0;
+    }
+    
+    /* ＋ボタン用 */
+    #addInput {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+    
+    #addInput:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+    
+    /* －ボタン用 */
+    .removeInput {
+      position: absolute;
+      right: -14px; /* 外に出す距離（調整OK） */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: bold;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    
+    .removeInput:hover {
+      background-color: #d32f2f;
+      transform: scale(1.05);
+    }
+
+    
+    .accordion-container {
+      margin: 1em 0;
+    }
+    
+    .accordion {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+      overflow: hidden;
+    }
+    
+    .accordion-header {
+      background-color: #f9f9f9;
+      padding: 0.75em 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .accordion-header:hover {
+      background-color: #ececec;
+    }
+    
+    .accordion-content {
+      display: none;
+      padding: 0.5em 1em;
+      background-color: #fff;
+    
+      /* 横並び用 */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+    }
+    
+    .accordion-content label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3em;
+      background-color: #f0f0f0;
+      padding: 0.3em 0.6em;
+      border-radius: 8px;
+      font-size: 0.9em;
+      cursor: pointer;
+      white-space: nowrap;
     }

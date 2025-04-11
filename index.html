@@ -2,257 +2,223 @@
 <html>
 <head>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
-<body onload="onLoad()">
+<body>
   <!-- IDを保持する hidden フィールド -->
   <input type="hidden" id="dataId">
   <input type="hidden" id="paymentList">
   <!-- 月切り替えボタン -->
-  <button onclick="changeMonth(-1)">前月</button>
+  <button id="previousMonthButton">前月</button>
   <span id="currentMonth"></span>
-  <button onclick="changeMonth(1)">翌月</button>
-
+  <button id="nextMonthButton">翌月</button>
   <div id="totalAmount">合計金額: 0</div>
   
-  <button id ="dataEntryButton" onclick="showPopup()">データ入力</button>
-  <button id="editButton" onclick="toggleEditMode()">編集</button>
-  <div id="jsonTable"></div> <!-- ここにJSONデータが表示されます -->
+  <button id ="dataEntryButton">📝入力</button>
+  <!-- ✅ ボタン（idが"openFilter"になってる？） -->
+  <button id="openFilter">🔍 絞り込み</button>
 
-  <div id="overlay" class="overlay" onclick="closePopup()"></div>
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <h3>データ入力</h3>
-      <div class="form-group">
-        <label for="date">日付</label>
-        <div class="input-group">
-          <input type="date" id="date">
-        </div>
-      </div>
+  <div id="overlay" class="overlay"></div>
 
-      <div class="form-group">
-        <label for="category-label">項目</label>
-        <div class="select-wrapper">
-          <select id="category" onchange="showDetail()">
-            <option value="">選択してください</option>
-            <option value="食費">食費</option>
-            <option value="美容費">美容費</option>
-            <option value="医療・保険費">医療・保険費</option>
-            <option value="日用品費">日用品費</option>
-            <option value="交際費">交際費</option>
-            <option value="娯楽費">娯楽費</option>
-            <option value="交通費">交通費</option>
-            <option value="水道・光熱費">水道・光熱費</option>
-            <option value="住まい全体">住まい全体</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
+  <!-- ✅ 検索画面モーダル -->
+  <div id="filterModal" class="filterModal">
 
-      <!-- 各カテゴリの詳細 -->
-      <!-- 食費 -->
-      <div class = "form-group" id="foodCategory1" style="display:none;">
-        <label for="food-label1">食費詳細1</label>
-        <div class="select-wrapper">
-          <select id="foodType1" onchange="showFoodCategory2()">
-            <option value="食料品">食料品</option>
-            <option value="外食費">外食費</option>
-            <option value="その他">その他</option>
-          </select>
+    <div class="accordion">
+      <div class="accordion-header">期間</div>
+      <div class="accordion-content" style="display: none;">
+        <div class="input-group" style="display: flex; gap: 0.5em; align-items: center;">
+          <input type="date" id="fromDate">
+          <span>〜</span>
+          <input type="date" id="toDate">
         </div>
       </div>
-
-      <div class = "form-group" id="foodCategory2" style="display:none;">
-        <label for="food-label2">食費詳細2</label>
-        <div class="select-wrapper">
-          <select id="foodType2">        
-            <option value="朝ごはん">朝ごはん</option>
-            <option value="昼ごはん">昼ごはん</option>
-            <option value="夜ごはん">夜ごはん</option>
-            <option value="カフェ">カフェ</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class = "form-group" id="beautyCategory" style="display:none;">
-        <label for="beauty-label">美容費詳細</label>
-        <div class="select-wrapper">
-          <select id="beautyType">
-            <option value="美容院、サロン">美容院・サロン</option>
-            <option value="化粧品">化粧品</option>
-            <option value="洋服">洋服</option>
-            <option value="下着">下着</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="medicalCategory" style="display:none;">
-        <label for="medical-label">医療・保険費</label>
-        <div class="select-wrapper">
-          <select id="medicalType">
-            <option value="病院代">病院代</option>
-            <option value="薬代">薬代</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="dailyNecessitiesCategory" style="display:none;">
-        <h3> </h3>
-        <label for="dailyNecessities-label">日用品費</label>
-        <div class="select-wrapper">
-          <select id="dailyNecessitiesType">
-            <option value="消耗品">消耗品</option>
-            <option value="清掃用品">清掃用品</option>
-            <option value="日用雑貨">日用雑貨</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="socialCategory" style="display:none;">
-        <label for="social-label">交際費</label>
-        <div class="select-wrapper">
-          <select id="socialType">
-            <option value="プレゼント">プレゼント</option>
-            <option value="ご祝儀・香典">ご祝儀・香典</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="entertainmentCategory" style="display:none;">
-        <label for="entertainment-label">娯楽費</label>
-        <div class="select-wrapper">
-          <select id="entertainmentType">
-            <option value="旅行">旅行</option>
-            <option value="イベント">イベント</option>
-            <option value="映画">映画</option>
-            <option value="漫画・本">漫画・本</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-group" id="transportationCategory" style="display:none;">
-        <label for="transportation-label">交通費</label>
-        <div class="select-wrapper">
-          <select id="transportationType">
-            <option value="電車">電車</option>
-            <option value="バス">バス</option>
-            <option value="飛行機">飛行機</option>
-            <option value="タクシー">タクシー</option>
-            <option value="その他">その他</option>
-         </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="utilityCategory" style="display:none;">
-        <label for="utility-label">水道・光熱費</label>
-        <div class="select-wrapper">
-          <select id="utilityType">
-            <option value="水道">水道</option>
-            <option value="電気">電気</option>
-            <option value="ガス">ガス</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="residenceCategory" style="display:none;">
-        <label for="residence-label">住まい全体</label>
-        <div class="select-wrapper">
-          <select id="residenceType">
-            <option value="家賃">家賃</option>
-            <option value="家電">家電</option>
-            <option value="家具">家具</option>
-            <option value="雑貨">雑貨</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group" id="othersCategory" style="display:none;">
-        <label for="others-label">その他</label>
-        <div class="input-group">
-         <input type="text"  id="othersType">
-        </div>
-      </div>
-
-      <!-- 購入店舗 -->
-      <div class="form-group" id="shopCategory" style="display: block;">
-        <label for="shop-label">店舗</label>
-        <div class="input-group">
-          <input type="text" id="shop">
-        </div>
-      </div>
-
-      <!-- 支払い方法 -->
-      <div class="form-group" id="paymentCategory" style="display: block;">
-        <label for="payment-label">支払い方法</label>
-        <div class="select-wrapper">
-          <select id="paymentType" onchange="showPaymentDetail()">
-            <option value="">選択してください</option>
-            <option value="現金">現金</option>
-            <option value="クレジットカード">クレジットカード</option>
-            <option value="銀行">銀行</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 銀行詳細 -->
-      <div class="form-group" id="bankCategory" style="display: none;">
-        <label for="bank-label">銀行</label>
-        <div class="select-wrapper">
-          <select id="bankType">
-            <option value="">選択してください</option>
-            <option value="りそな銀行">りそな銀行</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- クレジットカード詳細 -->
-      <div class="form-group" id="cardCategory" style="display: none;">
-        <label for="card-label">クレジットカード</label>
-        <div class="select-wrapper">
-          <select id="cardType">
-            <option value="">選択してください</option>
-            <option value="楽天">楽天カード</option>
-            <option value="paypay">paypayカード</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 金額 -->
-      <div class="form-group" id="priceCategory" style="display: block;">
-        <label for="price-label">金額</label>
-        <div class="input-group">
-          <input type="number" id="price">
-        </div>
-      </div>
-      
-      <!-- 内税 -->
-      <div class="form-group" id="taxCategory" style="display: block;">
-        <label for="tax-label">内税</label>
-        <div class="input-group">
-          <input type="number" id="tax">
-        </div>
-      </div>
-
-      <!-- 備考 -->
-      <div class="form-group" id="remarksCategory" style="display: block;">
-        <label for="price-label">備考</label>
-        <div class="input-group">
-          <input type="text" id="remarks">
-        </div>
-      </div>
-      <button onclick="sendData()">送信</button>
     </div>
-    <script src="script.js"></script>
+      <div class="accordion">
+        <div class="accordion-header">🍙 食費</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="食料品"> 食料品</label>
+          <label><input type="checkbox" id="eatingOut"name="category[]" value="外食費"> 外食費</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+          <div id="eatingOutOptions" style="display: none; margin-top: 0.5em;">
+            <label><input type="checkbox" name="mealDetail[]" value="朝食"> 朝食</label>
+            <label><input type="checkbox" name="mealDetail[]" value="昼食"> 昼食</label>
+            <label><input type="checkbox" name="mealDetail[]" value="夕食"> 夕食</label>
+            <label><input type="checkbox" name="mealDetail[]" value="カフェ"> カフェ</label>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion">
+        <div class="accordion-header">💄 美容・衣服</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="美容院"> 美容院</label>
+          <label><input type="checkbox" name="category[]" value="コスメ"> コスメ</label>
+          <label><input type="checkbox" name="category[]" value="洋服"> 洋服</label>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header">🏥 医療・保険費</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="病院代"> 病院代</label>
+          <label><input type="checkbox" name="category[]" value="薬代"> 薬代</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+      
+      <div class="accordion">
+        <div class="accordion-header"> 日用品</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="消耗品"> 消耗品</label>
+          <label><input type="checkbox" name="category[]" value="清掃用品"> 清掃用品</label>
+          <label><input type="checkbox" name="category[]" value="清掃用品"> 日用雑貨</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header"> 交際費</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="プレゼント"> プレゼント</label>
+          <label><input type="checkbox" name="category[]" value="ご祝儀・香典"> ご祝儀・香典</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header"> 交通費</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="電車"> 電車</label>
+          <label><input type="checkbox" name="category[]" value="バス"> バス</label>
+          <label><input type="checkbox" name="category[]" value="タクシー"> タクシー</label>
+          <label><input type="checkbox" name="category[]" value="飛行機"> 飛行機</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header"> 水道・光熱費</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="水道"> 水道</label>
+          <label><input type="checkbox" name="category[]" value="電気"> 電気</label>
+          <label><input type="checkbox" name="category[]" value="ガス"> ガス</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header"> 住まい全体</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="家賃"> 家賃</label>
+          <label><input type="checkbox" name="category[]" value="家電"> 家電</label>
+          <label><input type="checkbox" name="category[]" value="家具"> 家具</label>
+          <label><input type="checkbox" name="category[]" value="雑貨"> 雑貨</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+        </div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header">店舗</div>
+        <div class="accordion-content" style="display: none;">
+          <div class="input-group">
+            <input type="text" id="searchShop">
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header"> 支払い方法</div>
+        <div class="accordion-content" style="display: none;">
+          <label><input type="checkbox" name="category[]" value="現金"> 現金</label>
+          <label><input type="checkbox" name="category[]" id="card"value="クレジットカード"> クレジットカード</label>
+          <label><input type="checkbox" name="category[]" id="bank"value="銀行"> 銀行</label>
+          <label><input type="checkbox" name="category[]" value="その他"> その他</label>
+          <div id="cardOptions" style="display: none; margin-top: 0.5em;">
+            <label><input type="checkbox" name="paymentDetail[]" value="楽天"> 楽天</label>
+            <label><input type="checkbox" name="paymentDetail[]" value="paypay"> paypay</label>
+            <label><input type="checkbox" name="mealDetail[]" value="その他"> その他</label>
+          </div>
+          <div id="bankOptions" style="display: none; margin-top: 0.5em;">
+            <label><input type="checkbox" name="bankDetail[]" value="りそな銀行"> りそな銀行</label>
+            <label><input type="checkbox" name="bankDetail[]" value="その他"> その他</label>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header">フリーワード検索</div>
+        <div class="accordion-content" style="display: none;">
+          <div class="input-group">
+            <input type="text" id="freeWord">
+          </div>
+        </div>
+      </div>
+
+      <button id="searchButton">検索</button>
+
+    </div>
+  </div>
+
+  <!-- ✅ 詳細画面モーダル -->
+  <div id="detailModal"></div>
+      
+  <div id="jsonTable"></div> 
+  <!-- ここにJSONデータが表示されます -->
+
+  <template id="inputFormTemplate">
+    <div class="modal">
+      <div class="modal-content">
+        <h3>データ入力</h3>
+        <div class="form-group">
+          <label for="date">日付</label>
+          <div class="input-group">
+            <input type="date" id="date">
+          </div>
+        </div>
+
+        <div id="formContainer"></div>
+
+        <!-- 購入店舗 -->
+        <div class="form-group" id="shopCategory" style="display: block;">
+          <label for="shop-label">店舗</label>
+          <div class="input-group">
+            <input type="text" id="shop">
+          </div>
+        </div>
+
+        <!-- 購入品目 -->
+        <div class="form-group" id="itemGroup">
+          <label>品目</label>
+          <div class="input-group">
+            <input type="text" name="item[]" placeholder="品目を入力">
+            <input type="number" name="price[]" placeholder="金額を入力">
+          </div>
+        </div>
+      
+        <button type="button" id="addInput">＋</button>
+        <span class="dli-close-circle"><span></span></span>        
+      
+
+        <!-- 支払い方法 -->
+        <div id="paymentContainer"></div>
+
+        <!-- 金額 -->
+        <div class="form-group" id="amountCategory" style="display: block;">
+          <label for="amount-label">金額</label>
+          <div class="input-group">
+            <input type="number" id="amount">
+          </div>
+        </div>
+
+        <!-- 備考 -->
+        <div class="form-group" id="remarksCategory" style="display: block;">
+          <label for="remarks-label">備考</label>
+          <div class="input-group">
+            <input type="text" id="remarks">
+          </div>
+        </div>
+        <button id="sendDataButton">送信</button>
+    </div> <!-- .modal-content -->
+  </div> <!-- .modal -->
+</template>
+<script type="module" src="script.js"></script>
 </body>
 </html>

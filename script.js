@@ -1,12 +1,30 @@
+import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL} from './const.js';
+import { openFilter } from './search.js';
+//import { getDataById } from './utils.js';
+
 let jsonData = [];  // JSONデータを格納する
 let currentDate = new Date();  // 現在の月を取得
 let isEditing = false; // 編集モードのフラグ
 let paymentList = [];
 
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("ページが読み込まれました");
+    const dataEntryButton = document.getElementById("dataEntryButton");
+    const previousMonthButton = document.getElementById("previousMonthButton");
+    const nextMonthButton = document.getElementById("nextMonthButton");
+    const openFilterButton = document.getElementById("openFilter");
+
+    // イベントリスナーを設定
+    dataEntryButton?.addEventListener("click", showPopup);
+    previousMonthButton.addEventListener("click", () => changeMonth(-1));
+    nextMonthButton.addEventListener("click", () => changeMonth(1));
+    openFilterButton.addEventListener("click", openFilter);
+});
+
 // 非同期関数を修正
 async function fetchData() {
     console.log('Before fetch');
-    const response = await fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec');
+    const response = await fetch(CONNECTION_URL);
     const data = await response.json();
     console.log('取得したデータ:', data);
     return data; // データを返す
@@ -29,16 +47,6 @@ async function loadJSON() {
     }
 }
 
-function includePayment(payment){
-    let cardList = ["paypay","楽天"]
-    let bankList = ["りそな銀行"]
-    if(cardList.includes(payment)){
-        return "クレジットカード"
-    }else if(bankList.includes(payment)){
-        return "銀行"
-    }
-}
-
 // JSONデータをテーブルに表示（フィルタリングあり）
 function updateTable() {
     let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -48,7 +56,8 @@ function updateTable() {
     
     jsonData.forEach(entry => {
         if (entry.date && entry.date.startsWith(currentMonth)) {
-            total += parseFloat(entry.price || 0);
+            total += parseFloat(entry.amount || 0);
+            console.log(entry.amount)
         }
     });
     console.log('合計:', total);
@@ -61,6 +70,7 @@ function updateTable() {
                 <th>金額</th>
                 <th>支払い</th>
                 <th>備考</th>
+                <th>詳細</th>
             </tr>`;
 
     jsonData.forEach(entry => {
@@ -78,17 +88,20 @@ function updateTable() {
     let payment = (entry.payment.payment1 === "現金") 
                 ? entry.payment.payment1 
                 : entry.payment.payment2;
-    let price = `${entry.price}円\n<span class="small-text">(内税:${entry.tax}円)</span>`;
+    let amount = `${entry.amount}円`;
     let remarks = `${entry.shop}\n${entry.remarks}`;
     paymentList.push(entry.payment.payment1);
 
     table += `<tr data-id="${entry.id}">
-                <td>${formattedDate}</td>
-                <td contenteditable="${isEditing}">${category.replace(/\n/g, "<br>")}</td>
-                <td contenteditable="${isEditing}">${price.replace(/\n/g, "<br>")}</td>
-                <td contenteditable="${isEditing}">${payment}</td>
-                <td contenteditable="${isEditing}">${remarks.replace(/\n/g, "<br>")}</td>
-            </tr>`;
+        <td>${formattedDate}</td>
+        <td contenteditable="${isEditing}">${category.replace(/\n/g, "<br>")}</td>
+        <td contenteditable="${isEditing}">${amount}</td>
+        <td contenteditable="${isEditing}">${payment}</td>
+        <td contenteditable="${isEditing}">${remarks.replace(/\n/g, "<br>")}</td>
+        <td contenteditable="${isEditing}">
+        <a href="#" class="detailModalTrigger">詳細</a>
+        </td>
+    </tr>`;
     });
 
     table += "</table>";
@@ -96,333 +109,256 @@ function updateTable() {
 }
 
 
-function showDetail() {
-    var choice = document.getElementById("category").value;
-    switch(choice){
-        case "食費":
-        // 食費詳細を表示
-        document.getElementById("foodCategory1").style.display = "block";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "美容費":
-        // 美容費詳細を表示
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "block";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";       
-        break;   
-        case "医療・保険費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "block";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none"; 
-        break;
-        case "日用品費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "block";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "交際費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "block";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "娯楽費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "block";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "交通費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "block";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "水道・光熱費":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "block";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "住まい全体":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "block";
-        document.getElementById("othersCategory").style.display = "none";
-        break;
-        case "その他":
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "block";
-        break;
-        default:
-        document.getElementById("foodCategory1").style.display = "none";
-        document.getElementById("foodCategory2").style.display = "none";
-        document.getElementById("beautyCategory").style.display = "none";
-        document.getElementById("medicalCategory").style.display = "none";
-        document.getElementById("dailyNecessitiesCategory").style.display = "none";
-        document.getElementById("socialCategory").style.display = "none";
-        document.getElementById("entertainmentCategory").style.display = "none";
-        document.getElementById("transportationCategory").style.display = "none";
-        document.getElementById("utilityCategory").style.display = "none";
-        document.getElementById("residenceCategory").style.display = "none";
-        document.getElementById("othersCategory").style.display = "none";
-    } 
-}
 
-function showFoodCategory2() {
-    var choice = document.getElementById("foodType1").value;
-
-    // 外食費が選ばれた場合に、食費詳細2を表示
-    if (choice === "外食費") {
-        document.getElementById("foodCategory2").style.display = "block";
-    } else {
-        document.getElementById("foodCategory2").style.display = "none";
-    }
-}
-
-function showPaymentDetail() {
-    var choice = document.getElementById("paymentType").value;
-    if (choice === "銀行") {
-        document.getElementById("bankCategory").style.display = "block";
-        document.getElementById("cardCategory").style.display = "none";
-    } else if(choice === "クレジットカード"){
-        document.getElementById("bankCategory").style.display = "none";
-        document.getElementById("cardCategory").style.display = "block";
-    }else{
-        document.getElementById("bankCategory").style.display = "none";
-        document.getElementById("cardCategory").style.display = "none";
-    }
-}
 
 function showPopup() {
-  document.getElementById("overlay").style.display = "block";
-  document.getElementById("modal").style.display = "block";
+    const row = $(this).closest("tr");  // クリックされた <a> の親要素 <tr> を取得
+    const entryId = row.data("id");  // 行のデータ属性からIDを取得
+    const entryData = getDataById(entryId); // IDから該当のデータを取得
+
+    const template = document.getElementById("inputFormTemplate");
+    
+    const clone = template.content.cloneNode(true);
+    clone.querySelector("#date").value = new Date().toISOString().split('T')[0];
+    
+    const modalContainer = $("#detailModal");  // jQueryオブジェクト
+    
+    modalContainer.empty();  // 既存の内容をクリア
+    modalContainer.append(clone);  // テンプレートを追加
+    const overlay = $("#overlay");
+    const modal = modalContainer.find(".modal");  // jQueryでクエリセレクターの代わり
+    
+
+    // オーバーレイとモーダルの表示
+    overlay.show();
+    modal.show(); 
+    modalContainer.show();
+
+    // オーバーレイのクリックでモーダルを非表示にする処理
+    overlay.on("click", function() {
+        modal.hide();
+        overlay.hide();
+        modalContainer.hide();
+    });
+
+    // ここで動的に追加された+ボタンにもイベントをバインド
+    modalContainer.off("click", "#addInput").on("click", "#addInput", function () {
+        $("#itemGroup").append(`
+            <div class="input-group">
+                <input type="text" name="item[]" placeholder="品目を入力">
+                <input type="number" name="price[]" placeholder="金額を入力">
+                <button type="button" class="removeInput">－</button>
+            </div>
+        `);
+    });
+
+    // 動的に追加された-ボタンに対して（削除機能）
+    modalContainer.on("click", ".removeInput", function() {
+        $(this).closest(".input-group").remove();  // クリックされたボタンの親要素(input-group)を削除
+    });
+
+    
+    setupCategorySelects("#formContainer");
+    setupPaymentCategorySelects("#paymentContainer");
+
+    console.log(entryId);
+    //idが取得できれば初期値のセット
+    const extraWrapper = document.getElementById("extraSelectWrapper");
+    if (typeof entryId !== 'undefined') {
+        $("#mainCategory").val(entryData.category.category1);
+        if (entryData.category.category2 !== "") {
+            const subCategoryWrapper = document.getElementById("subCategoryWrapper");
+            subCategoryWrapper.innerHTML = ""; // 念のためリセット
+        
+            const subSelect = createSelect("subCategory", data[$("#mainCategory").val()], "サブカテゴリ");
+            subCategoryWrapper.appendChild(subSelect);
+        
+            // DOMに追加した後に値をセットする！
+            $("#subCategory").val(entryData.category.category2);
+
+            subSelect.addEventListener("change", function () {
+                extraWrapper.innerHTML = "";
+                const selectedCategory = this.value;
+                if ($("#mainCategory").val() === "食費" && selectedCategory === "外食費") {
+                    const extraSelect = createSelect("mealDetail", extraOptionsForEatingOut, "食事の種類");
+                    extraWrapper.appendChild(extraSelect);
+                }
+            });
+        }
+        console.log("犯人 : " + entryData.category.category3);
+        if (entryData.category.category3 === "" || entryData.category.category3 === null || typeof entryData.category.category3 === 'undefined') {
+            //
+        }else{
+            console.log("外食しょうさい");
+            
+            extraWrapper.innerHTML = ""; // 念のため初期化
+        
+            const extraSelect = createSelect("mealDetail", extraOptionsForEatingOut, "食事の種類");
+            extraWrapper.appendChild(extraSelect);
+        
+            // DOMに追加されたあとに値をセット！
+            $("#mealDetail").val(entryData.category.category3);
+        }
+
+        $("#shop").val(entryData.shop);
+        console.log("店舗 : " + entryData.shop)
+        const itemGroup = modalContainer.find("#itemGroup");
+
+        $('[name="item[]"]').val(entryData.product[0]);
+        $('[name="price[]"]').val(entryData.price[0]);
+
+        for (let i = 1; i < entryData.product.length; i++) {
+            const product = entryData.product[i];
+            const price = entryData.price[i];
+
+             const inputGroup = $(`
+                <div class="input-group">
+                    <input type="text" name="item[]" value="${product}" placeholder="品目を入力">
+                    <input type="number" name="price[]" value="${price}" placeholder="金額を入力">
+                    <button type="button" class="removeInput">－</button>
+                </div>
+            `);
+            itemGroup.append(inputGroup);
+        }
+        $("#paymentCategory").val(entryData.payment.payment1)
+        console.log("支払い方法 : " + entryData.payment.payment1);
+        if(entryData.payment.payment1 !== "現金"){
+            const subPaymentCategoryWrapper = document.getElementById("subPaymentCategoryWrapper");
+            subPaymentCategoryWrapper.innerHTML = ""; // 念のためリセット
+        
+            const subSelect = createSelect("subPaymentCategory", paymentData[$("#paymentCategory").val()], "サブカテゴリ");
+            subPaymentCategoryWrapper.appendChild(subSelect);
+        
+            // DOMに追加した後に値をセットする！
+            $("#subPaymentCategory").val(entryData.payment.payment2);
+        }
+        $("#amount").val(entryData.amount)
+        $("#remarks").val(entryData.remarks)
+    }
+
+    modalContainer.off("input", "input[name='price[]']").on("input", "input[name='price[]']", function () {
+        calculateTotalAmount();
+    });
+
+    modalContainer.off("click", ".removeInput").on("click", ".removeInput", function () {
+        $(this).closest(".input-group").remove();
+        calculateTotalAmount(); // ← 合計を再計算！
+    });
+
+    //送信ボタン押下時
+    modalContainer.off("click", "#sendDataButton");
+    modalContainer.on("click","#sendDataButton", function() {
+        sendData(entryId);
+    });
+}
+
+function generateUniqueId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+
+
+function setupCategorySelects(containerSelector) {
+
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+
+    container.innerHTML = "";
+    const heading = document.createElement("div");
+    heading.textContent = "項目";
+    heading.style.fontWeight = "bold";
+    heading.style.marginBottom = "4px";
+    container.appendChild(heading);
+
+    const categorySelect = createSelect("mainCategory", Object.keys(data), "カテゴリ");
+    container.appendChild(categorySelect);
+
+    const subCategoryWrapper = document.createElement("div");
+    subCategoryWrapper.id = "subCategoryWrapper";
+    container.appendChild(subCategoryWrapper);
+
+    const extraWrapper = document.createElement("div");
+    extraWrapper.id = "extraSelectWrapper";
+    container.appendChild(extraWrapper);
+
+    categorySelect.addEventListener("change", function () {
+        const selectedCategory = this.value;
+        subCategoryWrapper.innerHTML = "";
+        extraWrapper.innerHTML = "";
+
+        if (data[selectedCategory]) {
+            const subSelect = createSelect("subCategory", data[selectedCategory], "サブカテゴリ");
+            subCategoryWrapper.appendChild(subSelect);
+
+            subSelect.addEventListener("change", function () {
+                extraWrapper.innerHTML = "";
+                if (selectedCategory === "食費" && this.value === "外食費") {
+                    const extraSelect = createSelect("mealDetail", extraOptionsForEatingOut, "食事の種類");
+                    extraWrapper.appendChild(extraSelect);
+                }
+            });
+        }
+    });
+}
+
+function setupPaymentCategorySelects(containerSelector) {
+
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const heading = document.createElement("div");
+    heading.textContent = "支払い方法";
+    heading.style.fontWeight = "bold";
+    heading.style.marginBottom = "4px";
+    container.appendChild(heading);
+
+    const categorySelect = createSelect("paymentCategory", Object.keys(paymentData), "支払い方法");
+    container.appendChild(categorySelect);
+
+    const paymentWrapper = document.createElement("div");
+    paymentWrapper.id = "paymentWrapper"
+    container.appendChild(paymentWrapper);
+
+    const subPaymentCategoryWrapper = document.createElement("div");
+    subPaymentCategoryWrapper.id = "subPaymentCategoryWrapper";
+    container.appendChild(subPaymentCategoryWrapper);
+
+    categorySelect.addEventListener("change", function () {
+        const selectedCategory = this.value;
+        console.log(selectedCategory);
+        subPaymentCategoryWrapper.innerHTML = "";
+
+        if (paymentData[selectedCategory]) {
+            if(selectedCategory !== "現金"){
+                const subSelect = createSelect("subPaymentCategory", paymentData[selectedCategory], "サブカテゴリ");
+                subPaymentCategoryWrapper.appendChild(subSelect);
+            }
+        }
+    });
 }
 
 function closePopup() {
   document.getElementById("overlay").style.display = "none";
-  document.getElementById("modal").style.display = "none";
+  document.getElementById("filterModal").style.display = "none";
+  document.getElementById("detailModal").style.display = "none";
   document.body.style.zoom = "100%";
   window.scrollTo({ top: 0, behavior: "smooth" }); // 上にスクロール
-}
-
-function sendData() {
-    var date = document.getElementById("date").value;
-    var category1 = document.getElementById("category").value;
-    var category2 = "";
-    var category3 = "";
-    var shop = document.getElementById("shop").value;
-    //var product = document.getElementById("product").value;
-    var price = document.getElementById("price").value;
-    var payment1 = document.getElementById("paymentType").value;
-    var payment2 = payment1 === "クレジットカード" 
-            ? document.getElementById("cardType").value 
-            : payment1 === "銀行" 
-            ? document.getElementById("bankType").value : "";
-    var tax = document.getElementById("tax").value === ""
-        ?0
-        :document.getElementById("tax").value;
-
-    var remarks = document.getElementById("remarks").value;
-
-    //入力チェック
-    if(!date){
-        alert("日付を入力してください。")
-        return;
-    }
-    if(!category1){
-        alert("項目を選択してください。")
-        return;
-    }
-    if(!payment1){
-        alert("支払い方法を選択してください。")
-        return;
-    }
-    if (!price || isNaN(price)) {
-        alert("金額は数値で入力してください。");
-        return;
-    }
-
-    // カテゴリの設定
-    if (category1 === "食費") {
-        category2 = document.getElementById("foodType1").value;
-        if (category2 === "外食費") {
-            category3 = document.getElementById("foodType2").value;
-        }
-    } else {
-        category2 = getCategoryByType(category1);
-    }
-
-    // 🔥 ここがポイント：すでにあるデータなら `id` を維持
-    var existingId = generateUniqueId();
-
-    var newData = {
-        id: existingId,
-        date: date,
-        category: {
-        category1: category1,
-        category2: category2,
-        category3: category3,
-        },
-        shop: shop,
-        product: "",
-        price: price,
-        tax:tax,
-        payment: {
-        payment1: payment1,
-        payment2: payment2
-        },
-        remarks: remarks
-    };
-
-    console.log("送信するデータ:", newData); // 🔍 確認用
-
-    // データ送信
-    /*fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec', {
-        method: "POST",
-        headers:{
-            "Accept": "application/json",
-            "Content-Type" : "application/x-www-form-urlencoded"
-        },
-        'body': JSON.stringify(jsonData),
-        
-        })
-        .then(response => {
-            console.log("1");
-        return response.json();
-        })
-        .then(json => {
-            console.log("2");
-        // レスポンス json の処理
-        })
-        .catch(err => {
-            console.log("3");
-        // エラー処理
-        });*/
-    updateJSONData(newData);
-    updateTable();
-    alert("送信しました！");
-    closePopup();
-}
-
-// 一意のIDを生成（UUID）
-function generateUniqueId() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-        v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-    });
-}
-
-// カテゴリの設定を簡素化するヘルパー関数
-function getCategoryByType(category1) {
-    switch (category1) {
-    case "美容費":
-    return document.getElementById("beautyType").value;
-    case "医療・保険費":
-    return document.getElementById("medicalType").value;
-    case "日用品費":
-    return document.getElementById("dailyNecessitiesType").value;
-    case "交際費":
-    return document.getElementById("socialType").value;
-    case "娯楽費":
-    return document.getElementById("entertainmentType").value;
-    case "交通費":
-    return document.getElementById("transportationType").value;
-    case "水道・光熱費":
-    return document.getElementById("utilityType").value;
-    case "住まい全体":
-    return document.getElementById("residenceType").value;
-    case "その他":
-    return document.getElementById("othersType").value;
-    default:
-    return "";  // デフォルトで空文字を返す
-    }
 }
 
 // 初期データ読み込み
 function onLoad() {
     loadJSON();
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("date").value = today;
 }
+
+$(document).ready(function () {
+    onLoad();
+  });
 
 // 月を切り替える
 function changeMonth(offset) {
@@ -430,135 +366,227 @@ function changeMonth(offset) {
     updateTable();  // 表示を更新
 }
 
-function toggleEditMode() {
-    isEditing = !isEditing;
-    let tableCells = document.querySelectorAll("#jsonTable td");
-
-    if (isEditing) {
-        document.getElementById("editButton").innerText = "編集終了";
-        tableCells.forEach(cell => {
-        cell.contentEditable = true; // セルを編集可能に
-        });
-    } else {
-        document.getElementById("editButton").innerText = "編集";
-        tableCells.forEach(cell => {
-            cell.contentEditable = false; // セルの編集を無効化
-        });
-        saveTableData(); // 編集終了時にデータ更新
-    }
-}
-
-function saveTableData() {
-    let rows = document.querySelectorAll("#jsonTable tr");
-    rows.forEach((row, index) => {
-        if (index === 0) return; // ヘッダー行はスキップ
-        let cells = row.children;
-        let id = row.dataset.id; // 各行のID
-        let updatedEntry = jsonData.find(entry => entry.id === id);
-
-        if (updatedEntry) {    
-            //日付項目
-            let d = new Date(cells[0].innerText);
-            let formattedDate = ("0" + (d.getMonth() + 1)).slice(-2) + "/" + ("0" + d.getDate()).slice(-2);
-            
-            // カテゴリの分岐処理
-            let categoryParts = cells[1].innerText.split("\n");
-            updatedEntry.category.category1 = categoryParts[0].trim();
-            if (categoryParts[1]) {
-                let subParts = categoryParts[1].replace("(", "").replace(")", "").split(":");
-                updatedEntry.category.category2 = subParts[0].trim();
-                updatedEntry.category.category3 = subParts[1] ? subParts[1].trim() : "";
-            }
-
-            // 価格と内税の分岐
-            let priceParts = cells[2].innerText.split("円\n");
-            updatedEntry.price = priceParts[0].trim();
-            let taxParts = priceParts[1].replace("(内税:", "").replace("円)", "") 
-            updatedEntry.tax = taxParts;
-
-            //支払い方法
-            let paymentParts = cells[3].innerText;
-            if (paymentParts === "現金") {
-                updatedEntry.payment.payment1 = paymentParts;
-                updatedEntry.payment.payment2 = "";
-            } else{
-                if(includePayment(paymentParts) === "クレジットカード"){
-                    updatedEntry.payment.payment1 = "クレジットカード"
-                    updatedEntry.payment.payment2 = paymentParts;
-                }else if(includePayment(paymentParts) === "銀行")
-                updatedEntry.payment.payment1 = "銀行";
-                updatedEntry.payment.payment2 = paymentParts;
-            }
-
-            //店舗と備考の分割
-            let remarksParts = cells[4].innerText.trim().split("\n");  // 前後の改行を削除
-            updatedEntry.shop = remarksParts[0].trim();
-            updatedEntry.remarks = "";  // ここで空文字列で初期化
-
-            // 1番目から最後までの要素を結合
-            for (let i = 1; i < remarksParts.length; i++) {  
-                if (updatedEntry.remarks === "") {
-                    updatedEntry.remarks = remarksParts[i].trim();  // 各要素を結合 
-                } else {
-                    updatedEntry.remarks += "\n" + remarksParts[i].trim();  // 各要素を結合
-                }
-            }
-        }
-    });
-    let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
-    let total = 0;
-    jsonData.forEach(entry => {
-        if (entry.date.startsWith(currentMonth)) { // 今月のデータのみ集計
-          total += parseFloat(entry.price);
-        }
-      });
-    document.getElementById("totalAmount").innerText = "合計金額: " + total + "円";
-// まとめて JSON に反映
-updateJSONData(JSON.stringify(jsonData));
-}
-
 function updateJSONData(newData) {
     console.log("updateJsonData");
+    console.log("new jsonData : ", newData);
+
     let newJsonData;
-    let updatedContent = [];
-    newJsonData = (typeof newData === "string") ? JSON.parse(newData) : newData;
-    console.log("updateJsonData : " + newJsonData);
+    newJsonData = (typeof newData === "string") ? JSON.parse(newData) : [newData];  // newDataを配列として処理
+    
+    console.log("updateJsonData : ", JSON.stringify(newJsonData));
 
     let updated = false;
-    for (let i = 0; i < jsonData.length; i++) {
-        for (let j = 0; j < newJsonData.length; j++){
-          if (jsonData[i].id === newJsonData[j].id) {
-            Object.assign(jsonData[i], newJsonData[j]);
-            updated = true;
-          break;
-        }
-      }
-    }
-    console.log("updateJsonData : " + updated);
-    if (!updated) {
-       jsonData.push(newData);
-    }
-    //updatedContent = JSON.stringify(jsonData, null, 2);
-    
-    fetch('https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec', {
-    method: "POST",
-    headers:{
-        "Accept": "application/json",
-        "Content-Type" : "application/x-www-form-urlencoded"
-    },
-    'body': JSON.stringify(jsonData),
-    
-    })
-    .then(response => {
-        console.log("1");
-    return response.json();
-    })
-    .then(json => {
-        console.log("2");
-    // レスポンス json の処理
-    })
-    .catch(err => {
-        console.log("3" + err.message);
-    // エラー処理
+
+    // JSONデータの更新処理
+    $.each(jsonData, function(i, item) {
+        $.each(newJsonData, function(j, newItem) {
+            if (item.id === newItem.id) {
+                $.extend(item, newItem);  // データを更新
+                updated = true;
+                return false;  // ループを抜ける
+            }
+        });
     });
-  }
+
+    console.log("updated : ", updated);
+    
+    // 新しいデータがあれば追加
+    if (!updated) {
+        $.merge(jsonData, newJsonData);  // 配列を展開して追加
+    }
+
+    // サーバーに送信
+    $.ajax({
+        url: CONNECTION_URL,
+        method: "POST",
+        contentType: "application/x-www-form-urlencoded",
+        dataType: "json",
+        data: JSON.stringify(jsonData),
+        success: function(response) {
+            console.log("1");
+            // レスポンス処理
+        },
+        error: function(err) {
+            console.log("3", err.message);
+            // エラー処理
+        }
+    });
+}
+  
+// 詳細モーダルを開く
+$(document).on("click", ".detailModalTrigger", function(e) {
+    e.preventDefault();
+    showPopup.call(this);
+});
+
+export function getDataById(id) {
+    return jsonData.find(entry => entry.id === id);
+}
+// セレクトボックス作成関数
+export function createSelect(id, options, placeholder) {
+    console.log(id);
+    console.log(options);
+    console.log(placeholder);
+    const select = document.createElement("select");
+    select.id = id;
+    select.name = id;
+
+    const defaultOption = document.createElement("option");
+    defaultOption.text = `-- ${placeholder}を選択 --`;
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
+
+
+    options.forEach(optionText => {
+        const option = document.createElement("option");
+        option.value = optionText;
+        option.text = optionText;
+        select.appendChild(option);
+    });
+    return select;
+}
+
+export function calculateTotalAmount() {
+    let total = 0;
+    $("input[name='price[]']").each(function () {
+        const val = parseFloat($(this).val());
+        if (!isNaN(val)) {
+            total += val;
+        }
+    });
+    $("#amount").val(total); // 合計をセット（例としてamountフィールドに）
+}
+
+export function sendData(entryId) {
+    var date = $("#date").val();
+    var category1 = $("#mainCategory").val();
+    var category2 = $("#subCategory").val();
+    var category3 = $("#mealDetail").val() === null ? "" :$("#mealDetail").val(); 
+    var shop = $("#shop").val();
+    let product = $("input[name='item[]']").map(function() {
+        return $(this).val();
+    }).get();
+    let price = $("input[name='price[]']").map(function() {
+        return $(this).val();
+    }).get();
+    var amount = $("#amount").val();
+    var payment1 = $("#paymentCategory").val();
+
+    var payment2 = $("#subPaymentCategory").val();
+
+    var remarks = $("#remarks").val();
+
+    // 入力チェック
+    if (!date) {
+        alert("日付を入力してください。");
+        return;
+    }
+    console.log(category1);
+    if (!category1) {
+        alert("項目を選択してください。");
+        return;
+    }
+    if (!payment1) {
+        alert("支払い方法を選択してください。");
+        return;
+    }
+
+    for (let i = 0; i < price.length; i++) {
+        if (!price[i] || isNaN(price[i])) {
+            alert("金額は数値で入力してください。");
+            return;
+        }
+    }
+
+    var existingId = typeof entryId === 'undefined' ?generateUniqueId():entryId;
+
+    var newData = {
+        id: existingId,
+        date: date,
+        category: {
+            category1: category1,
+            category2: category2,
+            category3: category3,
+        },
+        shop: shop,
+        product: product,
+        price: price,
+        amount: amount,
+        payment: {
+            payment1: payment1,
+            payment2: payment2
+        },
+        remarks: remarks
+    };
+
+    console.log("送信するデータ:", newData);
+
+    updateJSONData(newData);
+    updateTable();
+    alert("送信しました！");
+    closePopup();
+}
+
+// getDataById関数
+
+/*
+
+  $("#saveDetail").on("click", function () {
+    const id = parseInt($("#modalEntryId").val());
+    const entry = jsonData.find(item => item.id === id);
+  
+    if (entry) {
+      // モーダルの入力値で更新
+      entry.date = $("#modalDate").val();
+      entry.category = $("#modalCategory").val();
+      entry.shop = $("#modalshop").val();
+      entry.payment = $("#modalPayment").val();
+      entry.remarks = $("#modalRemarks").val();
+  
+      // 品目と金額の更新
+      const newProducts = [];
+      const newPrices = [];
+  
+      $("#modalProductGroup .product-row").each(function () {
+        const product = $(this).find(".modalProduct").val();
+        const price = parseInt($(this).find(".modalPrice").val()) || 0;
+  
+        if (product) {
+          newProducts.push(product);
+          newPrices.push(price);
+        }
+      });
+  
+      entry.product = newProducts;
+      entry.price = newPrices;
+  
+      // テーブルの行も書き換え
+      const row = $(`tr[data-id="${id}"]`);
+      row.find("td").eq(0).text(entry.date);
+      row.find("td").eq(1).html(entry.category.replace(/\n/g, "<br>"));
+      row.find("td").eq(2).text(entry.amount);
+      row.find("td").eq(3).text(entry.payment);
+      row.find("td").eq(4).html(entry.remarks.replace(/\n/g, "<br>"));
+      
+      // 品目と金額の表示
+      row.find("td").eq(5).html(entry.product.map((p, i) => `${p} (${entry.price[i]}円)`).join("<br>"));
+  
+      $("#detailModal").hide(); // モーダルを閉じる
+    }
+  });
+  */
+
+/*  $("#modal-content").on("click", "#addProductRow", function () {
+    console.log("クリック");
+    $("#itemGroup").append(`
+      <div class="product-row">
+        <input type="text" class="modalProduct" placeholder="品目">
+        <input type="number" class="modalPrice" placeholder="金額">
+      </div>
+    `);
+  });*/
+  
+  
+  
+  
