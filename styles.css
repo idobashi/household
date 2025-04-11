@@ -289,34 +289,27 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
     
     .accordion-content {
-      display: none;
-      padding: 0.5em 1em;
-      background-color: #fff;
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      overflow-x: auto;
-    
-      /* 横並び用 */
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
+      justify-content: flex-start;
     }
-
     
     .accordion-content label {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.4em 0.8em;
       gap: 0.4em;
-      white-space: nowrap;
-      font-size: 0.9em;
-      border-radius: 8px;
+      padding: 0.4em 0.8em;
       background-color: #f0f0f0;
-      flex: 0 0 auto; /* 幅を固定した感じに */
-      min-width: 4.5em; /* 最小幅を確保して中身が折れないように */
+      border-radius: 8px;
+      font-size: 0.9em;
+      white-space: nowrap;
       box-sizing: border-box;
+    
+      /* これが追加点 */
+      flex-shrink: 0;
+      max-width: 100%;
     }
 
    
