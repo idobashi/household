@@ -336,7 +336,6 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     } */
     .accordion-content label {
       display: inline-flex;
-      align-items: center;
       gap: 0.2em;
       padding: 0.2em 0.3em;
       border-radius: 6px;
