@@ -309,6 +309,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
     
     .accordion-content {
+      display: none;
       padding: 0.5em 1em;
       background-color: #fff;
     
@@ -322,7 +323,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       box-sizing: border-box;
     }
     
-    /* .accordion-content label {
+    .accordion-content label {
       display: inline-flex;
       align-items: center;
       gap: 0.3em;
@@ -332,21 +333,8 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       font-size: 0.9em;
       cursor: pointer;
       white-space: nowrap;
-    } */
-    .accordion-content label {
-      display: inline-flex;
-      gap: 0.2em;
-      padding: 0.2em 0.3em;
-      border-radius: 6px;
-      font-size: 0.9em;
-      cursor: pointer;
-      white-space: nowrap;
     }
-
-    .accordion-content input[type="checkbox"] {
-      margin: 0;
-      padding: 0;
-    }
+    
 
     /* CSS側に追加しておくと見た目も整う */
     .input-group.date-range {
@@ -362,8 +350,23 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       box-sizing: border-box;
     }
     
-    .check-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.3em;
+    input[type="checkbox"] {
+      margin: 0;
+      padding: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1em;
+      height: 1em;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      position: relative;
+      vertical-align: middle;
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: "✔";
+      position: absolute;
+      font-size: 0.8em;
+      top: 0;
+      left: 0.15em;
     }
