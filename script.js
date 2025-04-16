@@ -1,6 +1,6 @@
 import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL} from './const.js';
-import { openFilter, clearFilter} from './search.js';
-//import { getDataById } from './utils.js';
+import { openFilter, clearFilter, searchJsonData} from './search.js';
+import { generateUniqueId,closePopup } from './utils.js';
 
 let jsonData = [];  // JSONデータを格納する
 let currentDate = new Date();  // 現在の月を取得
@@ -25,64 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function searchData(){
-    let newJsonData = [];
-    let matched = false;
-    let paymentMatched = false;
-    //チェックした項目を取得
-    const fromDate = document.getElementById('fromDate').value;
-    const toDate = document.getElementById('toDate').value;
-
-    const checkedCategory = Array.from(document.querySelectorAll('.check-item:checked'))
-                          .map(cb => cb.value);
-    const checkedPaymentItems = Array.from(document.querySelectorAll('.check-payment-item:checked'))
-                          .map(cb => cb.value);
-    
-    const keyword = document.getElementById('freeWord').value;
-    const keywords = keyword.split(/\s+/).filter(k => k !== "");
-    
-
-    jsonData.forEach(entry => {
-        const entryDate = new Date(entry.date);
-        const datePeriod = ((!fromDate || entryDate >= new Date(fromDate)) && (!toDate || entryDate <= new Date(toDate)));
-        // エントリ内のすべての値を再帰的に文字列にして1つにまとめる関数
-        const flattenValues = obj => {
-            if (typeof obj === 'string' || typeof obj === 'number') return [String(obj)];
-            if (Array.isArray(obj)) return obj.flatMap(flattenValues);
-            if (typeof obj === 'object' && obj !== null) {
-                return Object.values(obj).flatMap(flattenValues);
-            }
-            return [];
-        };
-        
-        const allValues = flattenValues(entry);
-        const hasKeywords = keywords.every(kw =>
-            allValues.some(val => val.toLowerCase().includes(kw.toLowerCase()))
-        );
-
-        checkedCategory.forEach(word => {
-            matched = allValues.some(val => val.includes(word));
-        });
-
-        checkedPaymentItems.forEach(word => {
-            paymentMatched = allValues.some(val => val.includes(word));
-        });
-
-        if((checkedCategory.length === 0 || matched) && datePeriod && (keywords.length === 0 || hasKeywords) && (checkedPaymentItems.length === 0 || paymentMatched)){
-            newJsonData.push(entry);
-        }
-        console.log("checkedCategory.length : " + checkedCategory.length + "matched : " + matched);
-        console.log(datePeriod);
-        console.log((keywords.length === 0 || hasKeywords));
-        console.log((checkedPaymentItems.length === 0 || paymentMatched));
-        
-    });
-    
+    const newJsonData = searchJsonData(jsonData);
     updateTable(newJsonData);
     closePopup();
 }
-
-
-
 
 // 非同期関数を修正
 async function fetchData() {
@@ -99,7 +45,7 @@ async function loadJSON() {
         const data = await fetchData(); // ローカル変数に一旦格納
 
         if (typeof data === 'string') {
-            jsonData = JSON.parse(data); // ← ここでグローバル変数に代入
+            jsonData = JSON.parse(data); 
         } else {
             jsonData = data;
         }
@@ -168,9 +114,6 @@ function updateTable(newJsonData) {
     table += "</table>";
     document.getElementById("jsonTable").innerHTML = table;
 }
-
-
-
 
 function showPopup() {
     const row = $(this).closest("tr");  // クリックされた <a> の親要素 <tr> を取得
@@ -311,16 +254,6 @@ function showPopup() {
     });
 }
 
-function generateUniqueId() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0,
-            v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-
-
 function setupCategorySelects(containerSelector) {
 
     const container = document.querySelector(containerSelector);
@@ -402,13 +335,7 @@ function setupPaymentCategorySelects(containerSelector) {
     });
 }
 
-function closePopup() {
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("filterModal").style.display = "none";
-  document.getElementById("detailModal").style.display = "none";
-  document.body.style.zoom = "100%";
-  window.scrollTo({ top: 0, behavior: "smooth" }); // 上にスクロール
-}
+
 
 // 初期データ読み込み
 function onLoad() {
@@ -517,7 +444,7 @@ export function calculateTotalAmount() {
     $("#amount").val(total); // 合計をセット（例としてamountフィールドに）
 }
 
-export function sendData(entryId) {
+function sendData(entryId) {
     var date = $("#date").val();
     var category1 = $("#mainCategory").val();
     var category2 = $("#subCategory").val();

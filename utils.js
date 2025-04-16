@@ -112,3 +112,11 @@ export function generateUniqueId() {
         return v.toString(16);
     });
 }
+
+export function closePopup() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("filterModal").style.display = "none";
+    document.getElementById("detailModal").style.display = "none";
+    document.body.style.zoom = "100%";
+    window.scrollTo({ top: 0, behavior: "smooth" }); // 上にスクロール
+  }
