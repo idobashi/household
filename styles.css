@@ -309,7 +309,6 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
     
     .accordion-content {
-      display: none;
       padding: 0.5em 1em;
       background-color: #fff;
     
@@ -363,3 +362,8 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       box-sizing: border-box;
     }
     
+    .check-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
