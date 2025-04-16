@@ -1,11 +1,10 @@
 import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL} from './const.js';
-import { openFilter } from './search.js';
+import { openFilter, clearFilter} from './search.js';
 //import { getDataById } from './utils.js';
 
 let jsonData = [];  // JSONデータを格納する
 let currentDate = new Date();  // 現在の月を取得
 let isEditing = false; // 編集モードのフラグ
-let paymentList = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("ページが読み込まれました");
@@ -13,13 +12,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const previousMonthButton = document.getElementById("previousMonthButton");
     const nextMonthButton = document.getElementById("nextMonthButton");
     const openFilterButton = document.getElementById("openFilter");
+    const searchButton = document.getElementById("searchButton");
+    const clearButton = document.getElementById("clearButton");
 
     // イベントリスナーを設定
     dataEntryButton?.addEventListener("click", showPopup);
     previousMonthButton.addEventListener("click", () => changeMonth(-1));
     nextMonthButton.addEventListener("click", () => changeMonth(1));
     openFilterButton.addEventListener("click", openFilter);
+    searchButton.addEventListener("click", searchData);
+    clearButton.addEventListener("click", clearFilter);
 });
+
+function searchData(){
+    let newJsonData = [];
+    let matched = false;
+    let paymentMatched = false;
+    //チェックした項目を取得
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+
+    const checkedCategory = Array.from(document.querySelectorAll('.check-item:checked'))
+                          .map(cb => cb.value);
+    const checkedPaymentItems = Array.from(document.querySelectorAll('.check-payment-item:checked'))
+                          .map(cb => cb.value);
+    
+    const keyword = document.getElementById('freeWord').value;
+    const keywords = keyword.split(/\s+/).filter(k => k !== "");
+    
+
+    jsonData.forEach(entry => {
+        const entryDate = new Date(entry.date);
+        const datePeriod = ((!fromDate || entryDate >= new Date(fromDate)) && (!toDate || entryDate <= new Date(toDate)));
+        // エントリ内のすべての値を再帰的に文字列にして1つにまとめる関数
+        const flattenValues = obj => {
+            if (typeof obj === 'string' || typeof obj === 'number') return [String(obj)];
+            if (Array.isArray(obj)) return obj.flatMap(flattenValues);
+            if (typeof obj === 'object' && obj !== null) {
+                return Object.values(obj).flatMap(flattenValues);
+            }
+            return [];
+        };
+        
+        const allValues = flattenValues(entry);
+        const hasKeywords = keywords.every(kw =>
+            allValues.some(val => val.toLowerCase().includes(kw.toLowerCase()))
+        );
+
+        checkedCategory.forEach(word => {
+            matched = allValues.some(val => val.includes(word));
+        });
+
+        checkedPaymentItems.forEach(word => {
+            paymentMatched = allValues.some(val => val.includes(word));
+        });
+
+        if((checkedCategory.length === 0 || matched) && datePeriod && (keywords.length === 0 || hasKeywords) && (checkedPaymentItems.length === 0 || paymentMatched)){
+            newJsonData.push(entry);
+        }
+        console.log("checkedCategory.length : " + checkedCategory.length + "matched : " + matched);
+        console.log(datePeriod);
+        console.log((keywords.length === 0 || hasKeywords));
+        console.log((checkedPaymentItems.length === 0 || paymentMatched));
+        
+    });
+    
+    updateTable(newJsonData);
+    closePopup();
+}
+
+
+
 
 // 非同期関数を修正
 async function fetchData() {
@@ -48,13 +111,14 @@ async function loadJSON() {
 }
 
 // JSONデータをテーブルに表示（フィルタリングあり）
-function updateTable() {
+function updateTable(newJsonData) {
+    const tableData = typeof newJsonData === 'undefined' ? jsonData : newJsonData;
     let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
     let total = 0;
     document.getElementById("currentMonth").innerText = currentMonth; // 現在の月を表示
-    jsonData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    tableData.sort((a, b) => new Date(a.date) - new Date(b.date));
     
-    jsonData.forEach(entry => {
+    tableData.forEach(entry => {
         if (entry.date && entry.date.startsWith(currentMonth)) {
             total += parseFloat(entry.amount || 0);
             console.log(entry.amount)
@@ -68,12 +132,11 @@ function updateTable() {
                 <th>日付</th>
                 <th>項目</th>
                 <th>金額</th>
-                <th>支払い</th>
                 <th>備考</th>
                 <th>詳細</th>
             </tr>`;
 
-    jsonData.forEach(entry => {
+    tableData.forEach(entry => {
     if (!entry.date.startsWith(currentMonth)) return; // 今月のデータ以外はスキップ
 
     let d = new Date(entry.date);
@@ -81,22 +144,20 @@ function updateTable() {
 
     let category = (entry.category.category1 === "食費")
                 ? (entry.category.category2 === "食料品")
-                ? `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`
-                : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
+                    ? `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`
+                    : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
                 : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`;
 
-    let payment = (entry.payment.payment1 === "現金") 
-                ? entry.payment.payment1 
-                : entry.payment.payment2;
-    let amount = `${entry.amount}円`;
+    let amount = (entry.payment.payment1 === "現金") 
+                ? `${entry.amount}円\n<span class="small-text">(${entry.payment.payment1})</span>`
+                : `${entry.amount}円\n<span class="small-text">(${entry.payment.payment2})</span>`
+    
     let remarks = `${entry.shop}\n${entry.remarks}`;
-    paymentList.push(entry.payment.payment1);
 
     table += `<tr data-id="${entry.id}">
         <td>${formattedDate}</td>
         <td contenteditable="${isEditing}">${category.replace(/\n/g, "<br>")}</td>
-        <td contenteditable="${isEditing}">${amount}</td>
-        <td contenteditable="${isEditing}">${payment}</td>
+        <td contenteditable="${isEditing}">${amount.replace(/\n/g, "<br>")}</td>
         <td contenteditable="${isEditing}">${remarks.replace(/\n/g, "<br>")}</td>
         <td contenteditable="${isEditing}">
         <a href="#" class="detailModalTrigger">詳細</a>
@@ -185,11 +246,9 @@ function showPopup() {
                 }
             });
         }
-        console.log("犯人 : " + entryData.category.category3);
         if (entryData.category.category3 === "" || entryData.category.category3 === null || typeof entryData.category.category3 === 'undefined') {
             //
         }else{
-            console.log("外食しょうさい");
             
             extraWrapper.innerHTML = ""; // 念のため初期化
         

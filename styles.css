@@ -1,5 +1,5 @@
 body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    .modal {
+/*     .modal {
       display: none;
       position: fixed;
       left: 50%;
@@ -7,18 +7,35 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       transform: translate(-50%, -50%);
       background: white;
       padding: 40px;  /* padding を増やして内部の余白を広げる */
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+/*       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       text-align: left;
       font-size:24px;
       width: 600px;  /* 幅を広げる */
-      max-width: 100%;  /* 最大幅を画面の90%に設定 */
+/*       max-width: 100%;  /* 最大幅を画面の90%に設定 */
+/*       z-index: 100;
+    } */
+    .modal {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box; /* paddingぶんを含めて100%以内に収める */
+      border-radius: 10px;
+      text-align: left;
+      font-size:15px;
+      width: 85%;
+      max-height: 90vh;
       z-index: 100;
+      overflow-y: auto
     }
+
     
     .modal-content {
       max-height: 80vh; /* 画面の80%の高さを最大値に */
-      overflow-y: auto; /* 縦スクロールを有効に */
     }
 
     .overlay {
@@ -43,18 +60,18 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      font-size: 25px;
+      font-size: 15px;
     }
     select {
       width: 100%;
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      font-size: 25px;
+      font-size: 15px;
     }
     button {
       all: unset;
-      --size: 20px; /* デフォルトサイズ */
+      --size: 10px; /* デフォルトサイズ */
       
       font-size: var(--size);
       padding: calc(var(--size) * 0.5) calc(var(--size));
@@ -94,22 +111,24 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
-      font-size: 22px; /* ここでサイズ調整 */
+      font-size: 8px; /* ここでサイズ調整 */
       word-wrap: break-word; /* 長い文字列を折り返す */
+      
     } 
     th {
       background-color: #f8f4e6;
       text-align: center;
+      font-size: 9px; /* ここでサイズ調整 */
+      font-weight: bold; /* 太字にする場合 */
     }
-    th:nth-child(1), td:nth-child(1) { width: 8%; } /* 日付 */
-    th:nth-child(2), td:nth-child(2) { width: 21%; } /* 項目 */
-    th:nth-child(3), td:nth-child(3) { width: 12%; } /* 金額 */
-    th:nth-child(4), td:nth-child(4) { width: 12%; } /* 支払い */
-    th:nth-child(5), td:nth-child(5) { width: 40%; } /* 備考 */
-    th:nth-child(6), td:nth-child(6) { width: 7%; } /* 詳細 */
+    th:nth-child(1), td:nth-child(1) { width: 12%; } /* 日付 */
+    th:nth-child(2), td:nth-child(2) { width: 23%; } /* 項目 */
+    th:nth-child(3), td:nth-child(3) { width: 15%; } /* 金額 */
+    th:nth-child(4), td:nth-child(4) { width: 40%; } /* 備考 */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* 詳細 */
 
     #totalAmount {
-      font-size: 40px; /* ここでサイズ調整 */
+      font-size: 25px; /* ここでサイズ調整 */
       font-weight: bold; /* 太字にする場合 */
       margin-top: 10px; /* 上に少し余白を追加 */
     }
@@ -127,7 +146,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     }
 
     #currentMonth {
-      font-size: 45px; /* 好みのサイズに変更 */
+      font-size: 25px; /* 好みのサイズに変更 */
       font-weight: bold; /* 太字にする */
       text-align: center; /* 中央揃え */
       margin-bottom: 10px; /* 下に余白を作る */
@@ -138,7 +157,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       margin-bottom: 20px;  /* ここで隙間を調整（20pxなど） */
     }
     .small-text {
-      font-size: 18px;
+      font-size:6px;
     }
     #filterModal {
       display: none;
@@ -151,9 +170,12 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       text-align: left;
-      font-size: 24px;
-      width: 600px;
-      max-width: 100%;
+      font-size: 15px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto; /* はみ出た場合にスクロール可能に */
+      box-sizing: border-box;
     }
     #filterModal .modal-content {
       max-height: 80vh;
@@ -167,19 +189,17 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       top: 50%;
       transform: translate(-50%, -50%);
       background: white;
-      padding: 40px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       text-align: left;
-      font-size: 24px;
-      width: 600px;
-      max-width: 100%;
+      font-size: 15px;
+      width: 90%;
+      max-width: 90%;
     }
     
     .modal-content {
       background: white;
       margin: 10% auto;
-      padding: 20px;
       width: 80%;
     }
     /*.input-group {
@@ -297,16 +317,35 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       display: flex;
       flex-wrap: wrap;
       gap: 0.5em;
+      width:100%;
+      flex: 1;
+      min-width: 0;
+      box-sizing: border-box;
     }
     
     .accordion-content label {
       display: inline-flex;
       align-items: center;
       gap: 0.3em;
-      background-color: #f0f0f0;
+      
       padding: 0.3em 0.6em;
       border-radius: 8px;
       font-size: 0.9em;
       cursor: pointer;
       white-space: nowrap;
     }
+
+    /* CSS側に追加しておくと見た目も整う */
+    .input-group.date-range {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      width: 90%;
+    }
+    
+    .input-group.date-range input[type="date"] {
+      flex: 1;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    

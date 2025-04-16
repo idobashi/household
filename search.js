@@ -31,6 +31,14 @@ export function openFilter(){
                 $("#eatingOutOptions input[type='checkbox']").prop("checked", false);
             }
         });
+
+        $(".category-header").off("click").on("click", function () {
+            const content = $(this).next(".category-content");
+        
+            // 他を閉じたい場合はこの行追加 → $(".accordion-content").not(content).slideUp();
+            content.slideToggle(200);
+          });
+
         $("#card").on("change", function() {
             if ($(this).is(":checked")) {
                 $("#cardOptions").slideDown();  // チェックされていれば表示
@@ -51,4 +59,8 @@ export function openFilter(){
         });
     })
     
+}
+
+export function clearFilter() {
+    document.getElementById("filterForm").reset();   
 }

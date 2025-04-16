@@ -1,7 +1,7 @@
 //本番環境用
-export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec';
+// export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec';
 //検証環境用
-//export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbxMupHOKq5AKbC0wPLRB3-MJAOt6eE9uWS6Lw-_qvw2CZCPatMoJSWqKnFKjSRNq_kjUA/exec';
+export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbxMupHOKq5AKbC0wPLRB3-MJAOt6eE9uWS6Lw-_qvw2CZCPatMoJSWqKnFKjSRNq_kjUA/exec';
 
 export const data = {
     "食費": ["食料品", "外食費", "その他"],
