@@ -202,11 +202,6 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       margin: 10% auto;
       width: 80%;
     }
-    /*.input-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }*/
 
     .input-group {
       position: relative;
@@ -370,3 +365,44 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       top: 0;
       left: 0.15em; 
     }
+
+    .paymentList {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      background-color: #fafafa;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .paymentList h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .paymentList table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .paymentList th,
+    .paymentList td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    /* 外部CSS or <style>タグで */
+    .payment-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .payment-table th, .payment-table td {
+      border: 1px solid #ccc; /* ← 線の色・太さを指定 */
+      padding: 4px;
+    }
+    .payment-table th:nth-child(1) { width: 20%; }
+    .payment-table th:nth-child(2) { width: 40%; }
+    .payment-table th:nth-child(3) { width: 20%; }
+    .payment-table th:nth-child(4) { width: 20%; }

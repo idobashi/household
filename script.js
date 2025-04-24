@@ -1,10 +1,13 @@
-import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL} from './const.js';
+import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL, paymentInfo} from './const.js';
 import { openFilter, clearFilter, searchJsonData} from './search.js';
 import { generateUniqueId,closePopup } from './utils.js';
+import {changeTotalTable,totalling} from './totaling.js'
+import {paymentListTable,createPaymentTable} from './paymentList.js'
 
 let jsonData = [];  // JSONデータを格納する
 let currentDate = new Date();  // 現在の月を取得
 let isEditing = false; // 編集モードのフラグ
+let monthChangeFlg = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("ページが読み込まれました");
@@ -14,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const openFilterButton = document.getElementById("openFilter");
     const searchButton = document.getElementById("searchButton");
     const clearButton = document.getElementById("clearButton");
+    const talbleButton = document.getElementById("changeTable");
+    const changeTotalling = document.getElementById("changeTotalling");
+    const paymentList = document.getElementById("paymentList");
 
     // イベントリスナーを設定
     dataEntryButton?.addEventListener("click", showPopup);
@@ -22,13 +28,24 @@ document.addEventListener('DOMContentLoaded', () => {
     openFilterButton.addEventListener("click", openFilter);
     searchButton.addEventListener("click", searchData);
     clearButton.addEventListener("click", clearFilter);
+    changeTotalling.addEventListener("click", () => {changeTotalTable(jsonData,currentDate,monthChangeFlg);});
+    paymentList.addEventListener("click", () => {createPaymentTable(jsonData,currentDate,paymentInfo);});
+    talbleButton.addEventListener("click", () => {showTable();});
 });
 
 function searchData(){
     const newJsonData = searchJsonData(jsonData);
     updateTable(newJsonData);
+    const chartView = document.getElementById("chartView");
+    const tableView = document.getElementById("jsonTable");
+    const paymentView = document.getElementById("paymentTable");
+
+    chartView.style.display = "none";
+    tableView.style.display = "block";
+    paymentView.style.display = "none";
     closePopup();
 }
+
 
 // 非同期関数を修正
 async function fetchData() {
@@ -50,24 +67,35 @@ async function loadJSON() {
             jsonData = data;
         }
 
-        updateTable(); // これで反映されるはず！
+        updateTable();
     } catch (e) {
         console.error('エラー:', e);
     }
+}
+
+function showTable(){
+    const chartView = document.getElementById("chartView");
+    const tableView = document.getElementById("jsonTable");
+    const paymentView = document.getElementById("paymentTable");
+
+    chartView.style.display = "none";
+    tableView.style.display = "block";
+    paymentView.style.display = "none";
 }
 
 // JSONデータをテーブルに表示（フィルタリングあり）
 function updateTable(newJsonData) {
     const tableData = typeof newJsonData === 'undefined' ? jsonData : newJsonData;
     let currentMonth = currentDate.getFullYear() + "-" + String(currentDate.getMonth() + 1).padStart(2, '0');
+    
     let total = 0;
+
     document.getElementById("currentMonth").innerText = currentMonth; // 現在の月を表示
     tableData.sort((a, b) => new Date(a.date) - new Date(b.date));
     
     tableData.forEach(entry => {
         if (entry.date && entry.date.startsWith(currentMonth)) {
             total += parseFloat(entry.amount || 0);
-            console.log(entry.amount)
         }
     });
     console.log('合計:', total);
@@ -169,6 +197,8 @@ function showPopup() {
     //idが取得できれば初期値のセット
     const extraWrapper = document.getElementById("extraSelectWrapper");
     if (typeof entryId !== 'undefined') {
+        console.log("date : " + entryData.date);
+        $("#date").val(entryData.date)
         $("#mainCategory").val(entryData.category.category1);
         if (entryData.category.category2 !== "") {
             const subCategoryWrapper = document.getElementById("subCategoryWrapper");
@@ -203,7 +233,6 @@ function showPopup() {
         }
 
         $("#shop").val(entryData.shop);
-        console.log("店舗 : " + entryData.shop)
         const itemGroup = modalContainer.find("#itemGroup");
 
         $('[name="item[]"]').val(entryData.product[0]);
@@ -348,18 +377,34 @@ $(document).ready(function () {
 
 // 月を切り替える
 function changeMonth(offset) {
+    const tableView = document.getElementById("jsonTable"); // JSONテーブルエリア
+    const chartView = document.getElementById("chartView");// グラフ描画エリア
+    const paymentView = document.getElementById("paymentTable");
+
+    const tableVisible = tableView.style.display;
+    const chartVisible = chartView.style.display;
+    console.log("chartView.style.display : " + chartView.style.display);
+    const paymentVisible = paymentView.style.display;
+    console.log("paymentView.style.display : " + window.getComputedStyle(paymentView).display);
+    
+
     currentDate.setMonth(currentDate.getMonth() + offset);  // 月を変更
+
     updateTable();  // 表示を更新
+    changeTotalTable(jsonData,currentDate,true);
+    paymentListTable(jsonData,currentDate,paymentInfo);
+    
+    tableView.style.display = tableVisible;
+    chartView.style.display = chartVisible;
+    paymentView.style.display = paymentVisible;
+    
+
 }
 
 function updateJSONData(newData) {
-    console.log("updateJsonData");
-    console.log("new jsonData : ", newData);
 
     let newJsonData;
     newJsonData = (typeof newData === "string") ? JSON.parse(newData) : [newData];  // newDataを配列として処理
-    
-    console.log("updateJsonData : ", JSON.stringify(newJsonData));
 
     let updated = false;
 
@@ -373,8 +418,6 @@ function updateJSONData(newData) {
             }
         });
     });
-
-    console.log("updated : ", updated);
     
     // 新しいデータがあれば追加
     if (!updated) {
@@ -410,9 +453,6 @@ export function getDataById(id) {
 }
 // セレクトボックス作成関数
 export function createSelect(id, options, placeholder) {
-    console.log(id);
-    console.log(options);
-    console.log(placeholder);
     const select = document.createElement("select");
     select.id = id;
     select.name = id;
@@ -505,74 +545,14 @@ function sendData(entryId) {
         },
         remarks: remarks
     };
-
-    console.log("送信するデータ:", newData);
-
     updateJSONData(newData);
     updateTable();
     alert("送信しました！");
     closePopup();
+    totalling(jsonData,currentDate,true);
+    paymentListTable(jsonData,currentDate,paymentInfo);
 }
 
-// getDataById関数
-
-/*
-
-  $("#saveDetail").on("click", function () {
-    const id = parseInt($("#modalEntryId").val());
-    const entry = jsonData.find(item => item.id === id);
-  
-    if (entry) {
-      // モーダルの入力値で更新
-      entry.date = $("#modalDate").val();
-      entry.category = $("#modalCategory").val();
-      entry.shop = $("#modalshop").val();
-      entry.payment = $("#modalPayment").val();
-      entry.remarks = $("#modalRemarks").val();
-  
-      // 品目と金額の更新
-      const newProducts = [];
-      const newPrices = [];
-  
-      $("#modalProductGroup .product-row").each(function () {
-        const product = $(this).find(".modalProduct").val();
-        const price = parseInt($(this).find(".modalPrice").val()) || 0;
-  
-        if (product) {
-          newProducts.push(product);
-          newPrices.push(price);
-        }
-      });
-  
-      entry.product = newProducts;
-      entry.price = newPrices;
-  
-      // テーブルの行も書き換え
-      const row = $(`tr[data-id="${id}"]`);
-      row.find("td").eq(0).text(entry.date);
-      row.find("td").eq(1).html(entry.category.replace(/\n/g, "<br>"));
-      row.find("td").eq(2).text(entry.amount);
-      row.find("td").eq(3).text(entry.payment);
-      row.find("td").eq(4).html(entry.remarks.replace(/\n/g, "<br>"));
-      
-      // 品目と金額の表示
-      row.find("td").eq(5).html(entry.product.map((p, i) => `${p} (${entry.price[i]}円)`).join("<br>"));
-  
-      $("#detailModal").hide(); // モーダルを閉じる
-    }
-  });
-  */
-
-/*  $("#modal-content").on("click", "#addProductRow", function () {
-    console.log("クリック");
-    $("#itemGroup").append(`
-      <div class="product-row">
-        <input type="text" class="modalProduct" placeholder="品目">
-        <input type="number" class="modalPrice" placeholder="金額">
-      </div>
-    `);
-  });*/
-  
   
   
   

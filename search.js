@@ -1,5 +1,4 @@
 export function openFilter(){
-    console.log("openFIlter");
 
     const overlay = $("#overlay");
     const filterModal = $("#filterModal");

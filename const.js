@@ -1,7 +1,7 @@
 //本番環境用
-export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec';
+//const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbwWED3UvSynkd3cboBcNvTMd0z1k1GN53VQioBB-MDbEcTZsiSwVvz4G798dBuY-X4J/exec';
 //検証環境用
-//export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbxMupHOKq5AKbC0wPLRB3-MJAOt6eE9uWS6Lw-_qvw2CZCPatMoJSWqKnFKjSRNq_kjUA/exec';
+export const CONNECTION_URL = 'https://script.google.com/macros/s/AKfycbxMupHOKq5AKbC0wPLRB3-MJAOt6eE9uWS6Lw-_qvw2CZCPatMoJSWqKnFKjSRNq_kjUA/exec';
 
 export const data = {
     "食費": ["食料品", "外食費", "その他"],
@@ -22,3 +22,30 @@ export const paymentData = {
         "クレジットカード":["楽天","paypay"],
         "銀行":["りそな銀行"]
     }
+
+export const paymentInfo = [ 
+    {
+        "payment":"楽天",
+        "periodStart":"1",
+        "periodEnd":"末日",
+        "paymentDate":"27"
+    },
+    {
+        "payment":"paypay",
+        "periodStart":"1",
+        "periodEnd":"末日",
+        "paymentDate":"27"
+    },
+    {
+        "payment":"現金",
+        "periodStart":"1",
+        "periodEnd":"末日",
+        "paymentDate":""
+    },
+    {
+        "payment":"りそな銀行",
+        "periodStart":"1",
+        "periodEnd":"末日",
+        "paymentDate":""
+    },
+]

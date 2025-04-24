@@ -9,7 +9,6 @@
 <body>
   <!-- IDを保持する hidden フィールド -->
   <input type="hidden" id="dataId">
-  <input type="hidden" id="paymentList">
   <!-- 月切り替えボタン -->
   <button id="previousMonthButton">前月</button>
   <span id="currentMonth"></span>
@@ -18,8 +17,10 @@
   
   <button id ="dataEntryButton">📝入力</button>
   <!-- ✅ ボタン（idが"openFilter"になってる？） -->
-  <button id="openFilter">🔍 絞り込み</button>
-  <button id="openFilter"> 集計</button>
+  <button id="openFilter">🔍 検索</button>
+  <button id="changeTable"> 一覧</button>
+  <button id="changeTotalling"> 集計</button>
+  <button id="paymentList"> 支払一覧</button>
 
   <div id="overlay" class="overlay"></div>
 
@@ -165,6 +166,9 @@
 
   <!-- ✅ 詳細画面モーダル -->
   <div id="detailModal"></div>
+
+  <!-- ✅ 支払い一覧画面モーダル -->
+  <div id="paymentTable"style="display:none;"></div>
       
   <div id="jsonTable"></div> 
   <!-- ここにJSONデータが表示されます -->
@@ -210,7 +214,7 @@
         <div class="form-group" id="amountCategory" style="display: block;">
           <label for="amount-label">金額</label>
           <div class="input-group">
-            <input type="number" id="amount">
+            <input type="number" id="amount" disabled="true">
           </div>
         </div>
 
@@ -225,6 +229,10 @@
     </div> <!-- .modal-content -->
   </div> <!-- .modal -->
 </template>
+
+  <div id="chartView" style="display:none;">
+    <canvas id="categoryPieChart"></canvas>
 <script type="module" src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
