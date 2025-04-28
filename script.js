@@ -107,9 +107,9 @@ function updateTable(newJsonData) {
     document.getElementById("totalAmount").innerText = "合計金額: " + total + "円";
 
     let table = `<table border='1'><tr>
-                <th>項目</th>
-                <th>店舗/備考</th>
-                <th>金額</th>
+                <th style="border-right: none;">家計簿一覧</th>
+                <th style="border-left: none;border-right: none;"></th>
+                <th style="border-left: none;"></th>
             </tr>`;
 
     tableData.forEach(entry => {
@@ -134,9 +134,9 @@ function updateTable(newJsonData) {
 
 
     table += `<tr data-id="${entry.id}">
-        <td><span class="small-text">${formattedDate}(${weekday}) ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
-        <td><br>${remarks.replace(/\n/g, "<br>")}</td>
-        <td style="vertical-align: middle;"><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
+        <td style="border-right: none;"><span class="small-text">${formattedDate}(${weekday}) ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
+        <td style="border-left: none;border-right: none;"><br>${remarks.replace(/\n/g, "<br>")}</td>
+        <td style="vertical-align: middle;border-left: none;"><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
     </tr>`;
     });
 

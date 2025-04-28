@@ -122,9 +122,19 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       font-size: 11px; /* ここでサイズ調整 */
       font-weight: bold; /* 太字にする場合 */
     }
-    th:nth-child(1), td:nth-child(1) { width: 27%; } /* 日付項目 */
-    th:nth-child(2), td:nth-child(2) { width: 55%; } /* 店舗備考 */
-    th:nth-child(3), td:nth-child(3) { width: 18%; } /* 金額 */
+
+    /* 全体のテーブルのスタイル */
+table {
+  width: 100%;
+  table-layout: fixed; /* 列の幅を固定 */
+  border-collapse: collapse; /* セルの境界線を重ねない */
+}
+
+    
+    th:nth-child(1), td:nth-child(1) { width: 27%; }  /*日付項目 */
+    th:nth-child(2), td:nth-child(2) { width: 55%; }  /*店舗備考 */
+    th:nth-child(3), td:nth-child(3) { width: 18%; }  /*金額 */
+
 
     #totalAmount {
       font-size: 25px; /* ここでサイズ調整 */
@@ -407,10 +417,9 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     .payment-table th:nth-child(4) { width: 20%; }
 
     #remarks {
-      width: 100%;           /* 幅を100%にして親要素にフィット */
-      height: 100px;         /* 高さを調整 */
-      overflow: auto;        /* 内容がオーバーフローした場合にスクロールできるように */
-      word-wrap: break-word; /* 長い単語が切れるように設定 */
-      resize: vertical;      /* ユーザーが縦方向にサイズ変更できるように */
-    }
-    
+  width: 100%;           /* 幅を100%にして親要素にフィット */
+  height: 100px;         /* 高さを調整 */
+  overflow: auto;        /* 内容がオーバーフローした場合にスクロールできるように */
+  word-wrap: break-word; /* 長い単語が切れるように設定 */
+  resize: vertical;      /* ユーザーが縦方向にサイズ変更できるように */
+}
