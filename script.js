@@ -1,4 +1,4 @@
-import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL, paymentInfo} from './const.js';
+import { data, extraOptionsForEatingOut, paymentData, CONNECTION_URL, paymentInfo, weekdays} from './const.js';
 import { openFilter, clearFilter, searchJsonData} from './search.js';
 import { generateUniqueId,closePopup } from './utils.js';
 import {changeTotalTable,totalling} from './totaling.js'
@@ -118,6 +118,7 @@ function updateTable(newJsonData) {
     let d = new Date(entry.date);
     let formattedDate = ("0" + (d.getMonth() + 1)).slice(-2) + "/" + ("0" + d.getDate()).slice(-2);
     const time = entry.time;
+    const weekday = weekdays[d.getDay()];
     
     let category = (entry.category.category1 === "食費")
                 ? (entry.category.category2 === "食料品")
@@ -131,10 +132,11 @@ function updateTable(newJsonData) {
     
     let remarks = `${entry.shop}\n${entry.remarks}`;
 
+
     table += `<tr data-id="${entry.id}">
-        <td><span class="small-text">${formattedDate} ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
+        <td><span class="small-text">${formattedDate}(${weekday}) ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
         <td><br>${remarks.replace(/\n/g, "<br>")}</td>
-        <td><br><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
+        <td style="vertical-align: middle;"><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
     </tr>`;
     });
 
