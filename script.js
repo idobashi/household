@@ -6,7 +6,6 @@ import {paymentListTable,createPaymentTable} from './paymentList.js'
 
 let jsonData = [];  // JSONデータを格納する
 let currentDate = new Date();  // 現在の月を取得
-let isEditing = false; // 編集モードのフラグ
 let monthChangeFlg = false;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -91,7 +90,12 @@ function updateTable(newJsonData) {
     let total = 0;
 
     document.getElementById("currentMonth").innerText = currentMonth; // 現在の月を表示
-    tableData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    tableData.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateA - dateB;
+      });
     
     tableData.forEach(entry => {
         if (entry.date && entry.date.startsWith(currentMonth)) {
@@ -103,10 +107,9 @@ function updateTable(newJsonData) {
     document.getElementById("totalAmount").innerText = "合計金額: " + total + "円";
 
     let table = `<table border='1'><tr>
-                <th>日付</th>
                 <th>項目</th>
+                <th>店舗/備考</th>
                 <th>金額</th>
-                <th>備考</th>
                 <th>詳細</th>
             </tr>`;
 
@@ -115,12 +118,13 @@ function updateTable(newJsonData) {
 
     let d = new Date(entry.date);
     let formattedDate = ("0" + (d.getMonth() + 1)).slice(-2) + "/" + ("0" + d.getDate()).slice(-2);
-
+    const time = entry.time;
+    
     let category = (entry.category.category1 === "食費")
                 ? (entry.category.category2 === "食料品")
-                    ? `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`
-                    : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
-                : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`;
+                    ? `${entry.category.category1}<span class="small-text">(${entry.category.category2})</span>`
+                    : `${entry.category.category1}<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
+                : `${entry.category.category1}<span class="small-text">(${entry.category.category2})</span>`;
 
     let amount = (entry.payment.payment1 === "現金") 
                 ? `${entry.amount}円\n<span class="small-text">(${entry.payment.payment1})</span>`
@@ -129,12 +133,11 @@ function updateTable(newJsonData) {
     let remarks = `${entry.shop}\n${entry.remarks}`;
 
     table += `<tr data-id="${entry.id}">
-        <td>${formattedDate}</td>
-        <td contenteditable="${isEditing}">${category.replace(/\n/g, "<br>")}</td>
-        <td contenteditable="${isEditing}">${amount.replace(/\n/g, "<br>")}</td>
-        <td contenteditable="${isEditing}">${remarks.replace(/\n/g, "<br>")}</td>
-        <td contenteditable="${isEditing}">
-        <a href="#" class="detailModalTrigger">詳細</a>
+        <td><span class="small-text">${formattedDate} ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
+        <td><br>${remarks.replace(/\n/g, "<br>")}</td>
+        <td><br>${amount.replace(/\n/g, "<br>")}</td>
+        <td>
+        <br><a href="#" class="detailModalTrigger">詳細</a>
         </td>
     </tr>`;
     });
@@ -147,11 +150,17 @@ function showPopup() {
     const row = $(this).closest("tr");  // クリックされた <a> の親要素 <tr> を取得
     const entryId = row.data("id");  // 行のデータ属性からIDを取得
     const entryData = getDataById(entryId); // IDから該当のデータを取得
-
     const template = document.getElementById("inputFormTemplate");
-    
     const clone = template.content.cloneNode(true);
-    clone.querySelector("#date").value = new Date().toISOString().split('T')[0];
+
+    
+    const date = new Date();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const formattedTime = `${hours}:${minutes}`;
+
+    clone.querySelector("#date").value = date.toISOString().split('T')[0];
+    clone.querySelector("#time").value = formattedTime;
     
     const modalContainer = $("#detailModal");  // jQueryオブジェクト
     
@@ -160,7 +169,6 @@ function showPopup() {
     const overlay = $("#overlay");
     const modal = modalContainer.find(".modal");  // jQueryでクエリセレクターの代わり
     
-
     // オーバーレイとモーダルの表示
     overlay.show();
     modal.show(); 
@@ -193,12 +201,13 @@ function showPopup() {
     setupCategorySelects("#formContainer");
     setupPaymentCategorySelects("#paymentContainer");
 
-    console.log(entryId);
     //idが取得できれば初期値のセット
     const extraWrapper = document.getElementById("extraSelectWrapper");
     if (typeof entryId !== 'undefined') {
         console.log("date : " + entryData.date);
-        $("#date").val(entryData.date)
+        $("#date").val(entryData.date);
+        $("#time").val(entryData.time);
+
         $("#mainCategory").val(entryData.category.category1);
         if (entryData.category.category2 !== "") {
             const subCategoryWrapper = document.getElementById("subCategoryWrapper");
@@ -485,23 +494,24 @@ export function calculateTotalAmount() {
 }
 
 function sendData(entryId) {
-    var date = $("#date").val();
-    var category1 = $("#mainCategory").val();
-    var category2 = $("#subCategory").val();
-    var category3 = $("#mealDetail").val() === null ? "" :$("#mealDetail").val(); 
-    var shop = $("#shop").val();
-    let product = $("input[name='item[]']").map(function() {
+    const date = $("#date").val();
+    const time = $("#time").val();
+    const category1 = $("#mainCategory").val();
+    const category2 = $("#subCategory").val();
+    const category3 = $("#mealDetail").val() === null ? "" :$("#mealDetail").val(); 
+    const shop = $("#shop").val();
+    const product = $("input[name='item[]']").map(function() {
         return $(this).val();
     }).get();
-    let price = $("input[name='price[]']").map(function() {
+    const price = $("input[name='price[]']").map(function() {
         return $(this).val();
     }).get();
-    var amount = $("#amount").val();
-    var payment1 = $("#paymentCategory").val();
+    const amount = $("#amount").val();
+    const payment1 = $("#paymentCategory").val();
 
-    var payment2 = $("#subPaymentCategory").val();
+    const payment2 = $("#subPaymentCategory").val();
 
-    var remarks = $("#remarks").val();
+    const remarks = $("#remarks").val();
 
     // 入力チェック
     if (!date) {
@@ -530,6 +540,7 @@ function sendData(entryId) {
     var newData = {
         id: existingId,
         date: date,
+        time: time,
         category: {
             category1: category1,
             category2: category2,

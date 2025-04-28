@@ -111,6 +111,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
+      vertical-align: top;
       font-size: 8px; /* ここでサイズ調整 */
       word-wrap: break-word; /* 長い文字列を折り返す */
       
@@ -121,11 +122,10 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       font-size: 9px; /* ここでサイズ調整 */
       font-weight: bold; /* 太字にする場合 */
     }
-    th:nth-child(1), td:nth-child(1) { width: 12%; } /* 日付 */
-    th:nth-child(2), td:nth-child(2) { width: 23%; } /* 項目 */
+    th:nth-child(1), td:nth-child(1) { width: 29%; } /* 日付項目 */
+    th:nth-child(2), td:nth-child(2) { width: 43%; } /* 店舗備考 */
     th:nth-child(3), td:nth-child(3) { width: 15%; } /* 金額 */
-    th:nth-child(4), td:nth-child(4) { width: 39%; } /* 備考 */
-    th:nth-child(5), td:nth-child(5) { width: 11%; } /* 詳細 */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* 備考 */
 
     #totalAmount {
       font-size: 25px; /* ここでサイズ調整 */
