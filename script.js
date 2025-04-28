@@ -110,7 +110,7 @@ function updateTable(newJsonData) {
                 <th>項目</th>
                 <th>店舗/備考</th>
                 <th>金額</th>
-                <th>詳細</th>
+                <th>-</th>
             </tr>`;
 
     tableData.forEach(entry => {
@@ -122,9 +122,9 @@ function updateTable(newJsonData) {
     
     let category = (entry.category.category1 === "食費")
                 ? (entry.category.category2 === "食料品")
-                    ? `${entry.category.category1}<span class="small-text">(${entry.category.category2})</span>`
-                    : `${entry.category.category1}<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
-                : `${entry.category.category1}<span class="small-text">(${entry.category.category2})</span>`;
+                    ? `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`
+                    : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2} : ${entry.category.category3})</span>`
+                : `${entry.category.category1}\n<span class="small-text">(${entry.category.category2})</span>`;
 
     let amount = (entry.payment.payment1 === "現金") 
                 ? `${entry.amount}円\n<span class="small-text">(${entry.payment.payment1})</span>`
