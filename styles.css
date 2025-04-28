@@ -405,3 +405,12 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     .payment-table th:nth-child(2) { width: 40%; }
     .payment-table th:nth-child(3) { width: 20%; }
     .payment-table th:nth-child(4) { width: 20%; }
+
+    #remarks {
+      width: 100%;           /* 幅を100%にして親要素にフィット */
+      height: 100px;         /* 高さを調整 */
+      overflow: auto;        /* 内容がオーバーフローした場合にスクロールできるように */
+      word-wrap: break-word; /* 長い単語が切れるように設定 */
+      resize: vertical;      /* ユーザーが縦方向にサイズ変更できるように */
+    }
+    
