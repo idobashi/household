@@ -112,20 +112,19 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       padding: 8px;
       text-align: left;
       vertical-align: top;
-      font-size: 9px; /* ここでサイズ調整 */
+      font-size: 10px; /* ここでサイズ調整 */
       word-wrap: break-word; /* 長い文字列を折り返す */
       
     } 
     th {
       background-color: #f8f4e6;
       text-align: center;
-      font-size: 10px; /* ここでサイズ調整 */
+      font-size: 11px; /* ここでサイズ調整 */
       font-weight: bold; /* 太字にする場合 */
     }
-    th:nth-child(1), td:nth-child(1) { width: 21%; } /* 日付項目 */
-    th:nth-child(2), td:nth-child(2) { width: 42%; } /* 店舗備考 */
-    th:nth-child(3), td:nth-child(3) { width: 13%; } /* 金額 */
-    th:nth-child(4), td:nth-child(4) { width: 7%; } /* 詳細 */
+    th:nth-child(1), td:nth-child(1) { width: 28%; } /* 日付項目 */
+    th:nth-child(2), td:nth-child(2) { width: 54%; } /* 店舗備考 */
+    th:nth-child(3), td:nth-child(3) { width: 18%; } /* 金額 */
 
     #totalAmount {
       font-size: 25px; /* ここでサイズ調整 */
@@ -157,7 +156,7 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
       margin-bottom: 20px;  /* ここで隙間を調整（20pxなど） */
     }
     .small-text {
-      font-size:7px;
+      font-size:8px;
     }
     #filterModal {
       display: none;

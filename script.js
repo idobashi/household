@@ -110,7 +110,6 @@ function updateTable(newJsonData) {
                 <th>項目</th>
                 <th>店舗/備考</th>
                 <th>金額</th>
-                <th>-</th>
             </tr>`;
 
     tableData.forEach(entry => {
@@ -135,10 +134,7 @@ function updateTable(newJsonData) {
     table += `<tr data-id="${entry.id}">
         <td><span class="small-text">${formattedDate} ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
         <td><br>${remarks.replace(/\n/g, "<br>")}</td>
-        <td><br>${amount.replace(/\n/g, "<br>")}</td>
-        <td>
-        <br><a href="#" class="detailModalTrigger">詳細</a>
-        </td>
+        <td><br><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
     </tr>`;
     });
 
