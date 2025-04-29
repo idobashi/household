@@ -139,7 +139,7 @@ function updateTable(newJsonData) {
 
 
     table += `<tr data-id="${entry.id}">
-        <td><span class="small-text">${formattedDate}(${weekday}) ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
+        <td><span class="date-text">${formattedDate}(${weekday}) ${time}</span><br>${category.replace(/\n/g, "<br>")}</td>
         <td><br>${remarks.replace(/\n/g, "<br>")}</td>
         <td style="vertical-align: middle;"><a href="#" class="detailModalTrigger">${amount.replace(/\n/g, "<br>")}</a></td>
     </tr>`;
