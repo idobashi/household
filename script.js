@@ -102,7 +102,6 @@ function updateTable(newJsonData) {
             total += parseFloat(entry.amount || 0);
         }
     });
-    console.log('合計:', total);
 
     document.getElementById("totalAmount").innerText = "合計金額: " + total + "円";
 
@@ -111,11 +110,6 @@ function updateTable(newJsonData) {
                 <th>店舗/備考</th>
                 <th>金額</th>
             </tr>`;
-    /* let table = `<table border='1'><tr>
-            <th style="border-right: none;">家計簿一覧</th>
-            <th style="border-left: none;border-right: none;"></th>
-            <th style="border-left: none;"></th>
-        </tr>`; */
 
     tableData.forEach(entry => {
     if (!entry.date.startsWith(currentMonth)) return; // 今月のデータ以外はスキップ
@@ -212,7 +206,6 @@ function showPopup() {
     //idが取得できれば初期値のセット
     const extraWrapper = document.getElementById("extraSelectWrapper");
     if (typeof entryId !== 'undefined') {
-        console.log("date : " + entryData.date);
         $("#date").val(entryData.date);
         $("#time").val(entryData.time);
 
@@ -465,7 +458,7 @@ $(document).on("click", ".detailModalTrigger", function(e) {
     showPopup.call(this);
 });
 
-export function getDataById(id) {
+function getDataById(id) {
     return jsonData.find(entry => entry.id === id);
 }
 // セレクトボックス作成関数
@@ -571,7 +564,3 @@ function sendData(entryId) {
     totalling(jsonData,currentDate,true);
     paymentListTable(jsonData,currentDate,paymentInfo);
 }
-
-  
-  
-  
